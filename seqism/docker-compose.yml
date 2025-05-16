@@ -1,0 +1,21 @@
+services:
+  seqism-gateway:
+    build: ./seqism-gateway
+    container_name: seqism-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - seqism-mq
+
+  seqism-core:
+    build: ./seqism-core
+    container_name: seqism-core
+    depends_on:
+      - seqism-mq
+
+  seqism-mq:
+    image: "rabbitmq:3-management"
+    container_name: seqism-mq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
