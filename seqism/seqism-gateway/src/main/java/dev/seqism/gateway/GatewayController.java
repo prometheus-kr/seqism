@@ -1,5 +1,6 @@
 package dev.seqism.gateway;
 
+import dev.seqism.common.vo.SeqismMessage;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -32,53 +33,45 @@ public class GatewayController {
     @PostMapping("/send")
     public ResponseEntity<String> sendMessage(@RequestBody Map<String, String> request) {
         String message = request.get("message");
-        System.out.println("[1] Gateway: Received message: " + message);
-
         String tranId = "" + System.currentTimeMillis() + "-transaction-uuid";
 
         String tranCQueue = "tranC." + tranId;
         String tranRQueue = "tranR." + tranId;
 
-        // 1. 트랜잭션 전용 큐 생성
         createQueue(tranCQueue);
         createQueue(tranRQueue);
 
-        // MQ로 메시지 전달
-        System.out.println("[2] Gateway: Sending to core via seqism-static-queue: " + tranId);
-        rabbitTemplate.convertAndSend("seqism-static-queue", tranId);
+        // MQ로 메시지 전달 (SeqismMessage 객체로)
+        rabbitTemplate.convertAndSend("seqism-static-queue", new SeqismMessage(tranId, message));
 
         // response queue에서 응답 대기 (timeout: 5초)
-        System.out.println("[5] Gateway: Waiting for response on " + tranCQueue);
-        Object response = rabbitTemplate.receiveAndConvert(tranCQueue, 5000);
-        System.out.println("[8] Gateway: Response from MQ: " + response);
+        Object response = receiveSeqismMessage(tranCQueue);
 
-        System.out.println("[9] Gateway: Sending to " + tranRQueue + ": " + message + "___1111");
-        rabbitTemplate.convertAndSend(tranRQueue, message + "___1111");
+        rabbitTemplate.convertAndSend(tranRQueue, new SeqismMessage(tranId, message + "___1111"));
+        response = receiveSeqismMessage(tranCQueue);
 
-        System.out.println("[12] Gateway: Waiting for response on " + tranCQueue);
-        response = rabbitTemplate.receiveAndConvert(tranCQueue, 5000);
-        System.out.println("[15] Gateway: Response from MQ: " + response);
-
-        System.out.println("[16] Gateway: Sending to " + tranRQueue + ": " + message + "___2222");
-        rabbitTemplate.convertAndSend(tranRQueue, message + "___2222");
-
-        System.out.println("[19] Gateway: Waiting for response on " + tranCQueue);
-        response = rabbitTemplate.receiveAndConvert(tranCQueue, 5000);
-        System.out.println("[22] Gateway: Response from MQ: " + response);
+        rabbitTemplate.convertAndSend(tranRQueue, new SeqismMessage(tranId, message + "___2222"));
+        response = receiveSeqismMessage(tranCQueue);
 
         deleteQueue(tranCQueue);
         deleteQueue(tranRQueue);
 
-        if (response != null) {
+        if (response instanceof SeqismMessage) {
+            return ResponseEntity.ok("Response from MQ: " + ((SeqismMessage) response).getMessage());
+        } else if (response != null) {
             return ResponseEntity.ok("Response from MQ: " + response.toString());
         } else {
             return ResponseEntity.status(504).body("No response from MQ (timeout)");
         }
     }
 
+    private Object receiveSeqismMessage(String queueName) {
+        return rabbitTemplate.receiveAndConvert(queueName, 5000);
+    }
+
     private void createQueue(String queueName) {
         Queue queue = QueueBuilder.durable(queueName)
-                .withArgument("x-expires", 60000) // 1분 후 미사용 시 삭제
+                .withArgument("x-expires", 60000)
                 .build();
         rabbitAdmin.declareQueue(queue);
     }
