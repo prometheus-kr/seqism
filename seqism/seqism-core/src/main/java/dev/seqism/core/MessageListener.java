@@ -20,21 +20,47 @@ public class MessageListener {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    @RabbitListener(queues = "seqism-request-queue")
+    @RabbitListener(queues = "seqism-static-queue")
     public void handleMessage(String message) {
-        System.out.println("Received message from MQ: " + message);
+        System.out.println("[3] Core: Received message from MQ: " + message);
 
-        // 비즈니스 로직 실행
-        String processed = processMessage(message);
+        String tranCQueue = "tranC." + message;
+        String tranRQueue = "tranR." + message;
 
-        // 응답 메시지를 별도의 큐에 전송
-        rabbitTemplate.convertAndSend("seqism-exchange", "seqism-response-routing-key", processed);
+        Thread thread = new Thread(() -> {
+            try {
+                this.proc(tranCQueue, tranRQueue);
+            } catch (Exception e) {
+                System.err.println("Error receiving message: " + e.getMessage());
+            }
+        });
+
+        thread.start();
     }
 
-    private String processMessage(String message) {
-        String result = "*" + message + "*";
-        System.out.println("Processing message: " + result);
-        // 실제 업무 처리 로직 구현
-        return result;
+    private void proc(String tranCQueue, String tranRQueue) {
+        System.out.println("[4] Core: Start processing");
+
+        // 비즈니스 로직 실행
+        String processed = "core_data";
+        System.out.println("[6] Core data: " + processed);
+
+        // 응답 메시지를 별도의 큐에 전송
+        rabbitTemplate.convertAndSend(tranCQueue, processed + "1111");
+        System.out.println("[7] Core: Sent response " + processed + "1111");
+
+        Object r = rabbitTemplate.receiveAndConvert(tranRQueue, 5000);
+        System.out.println("[10] Core: Received from " + tranRQueue + ": " + r);
+
+        // 응답 메시지를 별도의 큐에 전송
+        rabbitTemplate.convertAndSend(tranCQueue, processed + "2222");
+        System.out.println("[13] Core: Sent response " + processed + "2222");
+
+        r = rabbitTemplate.receiveAndConvert(tranRQueue, 5000);
+        System.out.println("[17] Core: Received from " + tranRQueue + ": " + r);
+
+        // 응답 메시지를 별도의 큐에 전송
+        rabbitTemplate.convertAndSend(tranCQueue, processed + "3333");
+        System.out.println("[20] Core: Sent response " + processed + "3333");
     }
 }
