@@ -31,7 +31,7 @@ public class GateWayQueueHelper {
     public SeqismMessage sendAndReceiveInit(String message) {
         String tranId = generateTranId();
         log.debug("tranId : [{}]", tranId);
-        
+
         createQueues(tranId);
 
         SeqismMessage msg = new SeqismMessage(tranId, message);
@@ -47,15 +47,6 @@ public class GateWayQueueHelper {
 
         rabbitTemplate.convertAndSend(getResponseQueueName(tranId), msg);
         return receive(tranId);
-    }
-
-    private SeqismMessage receive(String tranId) {
-        SeqismMessage receivedMsg = rabbitTemplate.receiveAndConvert(getCommandQueueName(tranId), RECEIVE_TIME_OUT, typeRef);
-        log.debug("Received message : [{}]", receivedMsg);
-
-        deleteQueuesIfNecessary(receivedMsg, tranId);
-
-        return receivedMsg;
     }
 
     String generateTranId() {
@@ -80,6 +71,15 @@ public class GateWayQueueHelper {
                 .withArgument("x-expires", QUEUE_DELETE_TIME)
                 .build();
         rabbitAdmin.declareQueue(queue);
+    }
+
+    private SeqismMessage receive(String tranId) {
+        SeqismMessage receivedMsg = rabbitTemplate.receiveAndConvert(getCommandQueueName(tranId), RECEIVE_TIME_OUT, typeRef);
+        log.debug("Received message : [{}]", receivedMsg);
+
+        deleteQueuesIfNecessary(receivedMsg, tranId);
+
+        return receivedMsg;
     }
 
     void deleteQueuesIfNecessary(SeqismMessage msg, String tranId) {

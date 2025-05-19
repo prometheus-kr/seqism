@@ -1,42 +1,26 @@
 package dev.seqism.core;
 
-import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageType;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.CompletableFuture;
-
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 /**
- * MessageListener
+ * DefaultMessageListener
  *
  * @author seqism
  * @since 2025.05.16
  */
 @Slf4j
 @Component
-public class MessageListener {
-    private final CoreQueueHelper queueHelper;
+public class DefaultMessageListener extends SeqismMessageListener {
 
-    MessageListener(CoreQueueHelper queueHelper) {
-        this.queueHelper = queueHelper;
+    DefaultMessageListener(CoreQueueHelper queueHelper) {
+        super(queueHelper);
     }
 
-    @RabbitListener(queues = SeqismConstant.SEQISM_STATIC_QUEUE)
-    public void handleMessage(SeqismMessage seqismMessage) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                this.proc(seqismMessage);
-            } catch (Exception e) {
-                log.error("An exception occurred while processing", e);
-                queueHelper.sendFinal(new SeqismMessage(seqismMessage.getTranId(), SeqismMessageType.FAILURE, e.getMessage()));
-            }
-        });
-    }
-
+    @Override
     void proc(SeqismMessage seqismMessage) {
         String tranId = seqismMessage.getTranId();
 
