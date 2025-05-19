@@ -1,11 +1,12 @@
 package dev.seqism.gateway;
 
+import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.SeqismMessage;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import dev.seqism.common.vo.SeqismMessage.SeqismMessageType;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,65 +19,59 @@ import java.util.Map;
  * @author seqism
  * @since 2025.05.16
  */
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class GatewayController {
+    private final GateWayQueueHelper queueHelper;
 
-    private final RabbitAdmin rabbitAdmin;
-    private final RabbitTemplate rabbitTemplate;
-
-    public GatewayController(RabbitAdmin rabbitAdmin, RabbitTemplate rabbitTemplate) {
-        this.rabbitAdmin = rabbitAdmin;
-        this.rabbitTemplate = rabbitTemplate;
+    public GatewayController(GateWayQueueHelper queueHelper) {
+        this.queueHelper = queueHelper;
     }
 
-    @PostMapping("/send")
-    public ResponseEntity<String> sendMessage(@RequestBody Map<String, String> request) {
-        String message = request.get("message");
-        String tranId = "" + System.currentTimeMillis() + "-transaction-uuid";
+    @PostMapping("/init")
+    public ResponseEntity<SeqismMessage> initSeqism(@RequestBody Map<String, String> request) {
+        return initSeqism0(request.get("message"));
+    }
 
-        String tranCQueue = "tranC." + tranId;
-        String tranRQueue = "tranR." + tranId;
+    @PostMapping("/next")
+    public ResponseEntity<SeqismMessage> nextSeqism(@RequestBody Map<String, String> request) {
+        return nextSeqism0(request.get("tranId"), request.get("message"));
+    }
 
-        createQueue(tranCQueue);
-        createQueue(tranRQueue);
-
-        // MQ로 메시지 전달 (SeqismMessage 객체로)
-        rabbitTemplate.convertAndSend("seqism-static-queue", new SeqismMessage(tranId, message));
-
-        // response queue에서 응답 대기 (timeout: 5초)
-        Object response = receiveSeqismMessage(tranCQueue);
-
-        rabbitTemplate.convertAndSend(tranRQueue, new SeqismMessage(tranId, message + "___1111"));
-        response = receiveSeqismMessage(tranCQueue);
-
-        rabbitTemplate.convertAndSend(tranRQueue, new SeqismMessage(tranId, message + "___2222"));
-        response = receiveSeqismMessage(tranCQueue);
-
-        deleteQueue(tranCQueue);
-        deleteQueue(tranRQueue);
-
-        if (response instanceof SeqismMessage) {
-            return ResponseEntity.ok("Response from MQ: " + ((SeqismMessage) response).getMessage());
-        } else if (response != null) {
-            return ResponseEntity.ok("Response from MQ: " + response.toString());
-        } else {
-            return ResponseEntity.status(504).body("No response from MQ (timeout)");
+    ResponseEntity<SeqismMessage> initSeqism0(@Nullable String message) {
+        try {
+            SeqismMessage response = queueHelper.sendAndReceiveInit(message);
+            return buildResponseEntity(response);
+        } catch (Exception e) {
+            log.error("Error in initSeqism", e);
+            return buildResponseEntity("Internal error : " + e.getMessage());
         }
     }
 
-    private Object receiveSeqismMessage(String queueName) {
-        return rabbitTemplate.receiveAndConvert(queueName, 5000);
+    ResponseEntity<SeqismMessage> nextSeqism0(String tranId, String message) {
+        try {
+            if (tranId == null || tranId.isBlank() || message == null || message.isBlank()) {
+                throw new IllegalArgumentException("tranId and message must not be null or blank");
+            }
+
+            SeqismMessage response = queueHelper.sendAndReceiveNext(new SeqismMessage(tranId, message));
+
+            return buildResponseEntity(response);
+        } catch (Exception e) {
+            log.error("Error in nextSeqism", e);
+            return buildResponseEntity("Internal error : " + e.getMessage());
+        }
     }
 
-    private void createQueue(String queueName) {
-        Queue queue = QueueBuilder.durable(queueName)
-                .withArgument("x-expires", 60000)
-                .build();
-        rabbitAdmin.declareQueue(queue);
+    ResponseEntity<SeqismMessage> buildResponseEntity(SeqismMessage response) {
+        SeqismMessage result = response != null
+                ? response
+                : new SeqismMessage("No response from MQ (timeout) or invalid request");
+        return ResponseEntity.ok(result);
     }
 
-    private void deleteQueue(String queueName) {
-        rabbitAdmin.deleteQueue(queueName);
+    ResponseEntity<SeqismMessage> buildResponseEntity(String errorMessage) {
+        return ResponseEntity.ok(new SeqismMessage(errorMessage));
     }
 }

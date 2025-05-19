@@ -8,9 +8,9 @@ mvn clean install
 echo "Stopping existing containers..."
 docker compose down
 
-# 3️⃣ Docker 컨테이너 다시 시작 (jar만 복사하는 Dockerfile 구조여야 함)
+# 3️⃣ Docker 컨테이너 다시 시작
 echo "Starting containers..."
-docker compose up -d
+docker compose up --build -d
 
 # 4️⃣ RabbitMQ가 정상 기동될 때까지 대기
 echo "Waiting for RabbitMQ to be ready..."
@@ -30,6 +30,10 @@ echo "Gateway is ready!"
 
 # 6️⃣ Gateway로 테스트 메시지 전송
 echo "Sending test message to Gateway..."
-curl -X POST http://localhost:8080/api/send -H "Content-Type: application/json" -d '{"message": "Hello, Seqism!"}'
+init_response=$(curl -s -X POST http://localhost:8080/api/init -H "Content-Type: application/json" -d '{"message": "Hello, Seqism!"}')
+tranId=$(echo "$init_response" | grep -oP '"tranId"\s*:\s*"\K[^"]+')
+curl -s -X POST http://localhost:8080/api/next -H "Content-Type: application/json" -d "{\"tranId\":\"$tranId\", \"message\":\"Hello, Seqism!\"}"
+curl -s -X POST http://localhost:8080/api/next -H "Content-Type: application/json" -d "{\"tranId\":\"$tranId\", \"message\":\"Hello, Seqism!\"}"
+curl -s -X POST http://localhost:8080/api/next -H "Content-Type: application/json" -d "{\"tranId\":\"$tranId\", \"message\":\"Hello, Seqism!\"}"
 
 echo "Test completed!"

@@ -32,6 +32,6 @@ public class RabbitConfig {
     
     @Bean
     public Queue queue() {
-        return new Queue("seqism-static-queue", true);
+        return new Queue("seqism-static-queue");
     }
 }

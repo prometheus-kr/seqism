@@ -1,8 +1,13 @@
 package dev.seqism.core;
 
+import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.SeqismMessage;
+import dev.seqism.common.vo.SeqismMessage.SeqismMessageType;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,45 +16,40 @@ import org.springframework.stereotype.Component;
  * @author seqism
  * @since 2025.05.16
  */
+@Slf4j
 @Component
 public class MessageListener {
+    private final CoreQueueHelper queueHelper;
 
-    private final RabbitTemplate rabbitTemplate;
-
-    MessageListener(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
+    MessageListener(CoreQueueHelper queueHelper) {
+        this.queueHelper = queueHelper;
     }
 
-    @RabbitListener(queues = "seqism-static-queue")
+    @RabbitListener(queues = SeqismConstant.SEQISM_STATIC_QUEUE)
     public void handleMessage(SeqismMessage seqismMessage) {
-        String tranCQueue = "tranC." + seqismMessage.getTranId();
-        String tranRQueue = "tranR." + seqismMessage.getTranId();
-
-        Thread thread = new Thread(() -> {
+        CompletableFuture.runAsync(() -> {
             try {
-                this.proc(tranCQueue, tranRQueue, seqismMessage.getMessage());
+                this.proc(seqismMessage);
             } catch (Exception e) {
-                System.err.println("Error receiving message: " + e.getMessage());
+                log.error("An exception occurred while processing", e);
+                queueHelper.sendFinal(new SeqismMessage(seqismMessage.getTranId(), SeqismMessageType.FAILURE, e.getMessage()));
             }
         });
-
-        thread.start();
     }
 
-    private void proc(String tranCQueue, String tranRQueue, String message) {
-        String processed = "core_data";
-        rabbitTemplate.convertAndSend(tranCQueue, new SeqismMessage(extractTranId(tranCQueue), processed + "1111"));
-        rabbitTemplate.receiveAndConvert(tranRQueue, 5000);
+    void proc(SeqismMessage seqismMessage) {
+        String tranId = seqismMessage.getTranId();
 
-        rabbitTemplate.convertAndSend(tranCQueue, new SeqismMessage(extractTranId(tranCQueue), processed + "2222"));
-        rabbitTemplate.receiveAndConvert(tranRQueue, 5000);
+        String processed = "core_data1111";
+        SeqismMessage response = queueHelper.sendAndReceiveOrThrow(new SeqismMessage(tranId, processed));
 
-        rabbitTemplate.convertAndSend(tranCQueue, new SeqismMessage(extractTranId(tranCQueue), processed + "3333"));
-    }
+        processed = response.getMessage() + "2222";
+        response = queueHelper.sendAndReceiveOrThrow(new SeqismMessage(tranId, processed));
 
-    private String extractTranId(String tranCQueue) {
-        // "tranC.{tranId}"에서 tranId 추출
-        int idx = tranCQueue.indexOf(".");
-        return idx > 0 ? tranCQueue.substring(idx + 1) : tranCQueue;
+        processed = response.getMessage() + "3333";
+        response = queueHelper.sendAndReceiveOrThrow(new SeqismMessage(tranId, processed));
+
+        processed = response.getMessage() + "4444";
+        queueHelper.sendFinal(new SeqismMessage(tranId, SeqismMessageType.SUCCESS, processed));
     }
 }

@@ -8,7 +8,7 @@ docker compose down
 
 # 3️⃣ Docker 컨테이너 다시 시작
 Write-Host "Starting containers..."
-docker compose up -d
+docker compose up --build -d
 
 # 4️⃣ RabbitMQ가 정상 기동될 때까지 대기
 Write-Host "Waiting for RabbitMQ to be ready..."
@@ -36,6 +36,10 @@ Write-Host "Gateway is ready!"
 
 # 6️⃣ Gateway로 테스트 메시지 전송
 Write-Host "Sending test message to Gateway..."
-Invoke-RestMethod -Uri "http://localhost:8080/api/send" -Method "Post" -ContentType "application/json" -Body '{"message": "Hello, Seqism!"}'
+for ($i = 1; $i -le 200; $i++) { 
+    $response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"message": "Hello, Seqism!"}'
+    Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{tranId=$response.tranId; message="Hello, Seqism!"} | ConvertTo-Json)
+    Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{tranId=$response.tranId; message="Hello, Seqism!"} | ConvertTo-Json)
+}
 
 Write-Host "Test completed!"

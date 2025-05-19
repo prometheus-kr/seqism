@@ -2,30 +2,31 @@ package dev.seqism.common.vo;
 
 import java.io.Serializable;
 
-public class SeqismMessage implements Serializable {
-    private String tranId;
-    private String message;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-    public SeqismMessage() {}
+@Data
+@AllArgsConstructor
+public class SeqismMessage implements Serializable {
+    private final String tranId;
+    private final SeqismMessageType type;
+    private final String message;
+
+    public SeqismMessage() {
+        this(null, null);
+    }
+
+    public SeqismMessage(String errorMessage) {
+        this(null, SeqismMessageType.FAILURE, errorMessage);
+    }
 
     public SeqismMessage(String tranId, String message) {
-        this.tranId = tranId;
-        this.message = message;
+        this(tranId, SeqismMessageType.IN_PROGRESS, message);
     }
 
-    public String getTranId() {
-        return tranId;
-    }
-
-    public void setTranId(String tranId) {
-        this.tranId = tranId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public enum SeqismMessageType {
+        IN_PROGRESS,   // 진행중
+        SUCCESS,       // 완료_성공
+        FAILURE        // 완료_실패
     }
 }
