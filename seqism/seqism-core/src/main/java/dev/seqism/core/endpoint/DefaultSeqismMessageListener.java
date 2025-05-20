@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * DefaultMessageListener
@@ -19,10 +20,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class DefaultSeqismMessageListener extends SeqismMessageListener {
-    private final Map<String, BizProcessor> processorMap;
+public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> {
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final Map<String, BizProcessor<?>> processorMap;
 
-    DefaultSeqismMessageListener(CoreQueueHelper queueHelper, List<BizProcessor> processors) {
+    DefaultSeqismMessageListener(CoreQueueHelper queueHelper, List<BizProcessor<?>> processors) {
         super(queueHelper);
         this.processorMap = processors.stream().collect(Collectors.toMap(BizProcessor::getBizCode, p -> p));
     }
@@ -30,13 +32,17 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener {
     @Override
     void proc(SeqismMessage<Object> seqismMessage) {
         String bizCode = seqismMessage.getHeader().getBizCode();
-        BizProcessor processor = processorMap.get(bizCode);
+        BizProcessor<?> processor = processorMap.get(bizCode);
 
         if (processor != null) {
-            processor.process(seqismMessage, queueHelper);
+            callProcessor(processor, seqismMessage);
         } else {
             log.error("No processor found for bizCode : [{}]", bizCode);
             queueHelper.sendFinal(new SeqismMessage<>(seqismMessage.getHeader().toFailure(), "No processor found for bizCode : " + bizCode));
         }
+    }
+
+    <T> void callProcessor(BizProcessor<T> processor, SeqismMessage<Object> seqismMessage) {
+        processor.process(new SeqismMessage<>(seqismMessage.getHeader(), mapper.convertValue(seqismMessage.getBody(), processor.getBodyType())));
     }
 }

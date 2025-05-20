@@ -16,7 +16,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
  * @since 2025.05.16
  */
 @Slf4j
-public abstract class SeqismMessageListener {
+public abstract class SeqismMessageListener<T> {
     protected final CoreQueueHelper queueHelper;
 
     SeqismMessageListener(CoreQueueHelper queueHelper) {
@@ -24,7 +24,7 @@ public abstract class SeqismMessageListener {
     }
 
     @RabbitListener(queues = SeqismConstant.SEQISM_STATIC_QUEUE)
-    public void handleMessage(SeqismMessage<Object> seqismMessage) {
+    public void handleMessage(SeqismMessage<T> seqismMessage) {
         CompletableFuture.runAsync(() -> {
             try {
                 this.proc(seqismMessage);
@@ -35,5 +35,5 @@ public abstract class SeqismMessageListener {
         });
     }
 
-    abstract void proc(SeqismMessage<Object> seqismMessage);
+    abstract void proc(SeqismMessage<T> seqismMessage);
 }

@@ -53,6 +53,17 @@ for ($i = 1; $i -le 2; $i++) {
     Write-Host ($r3 | ConvertTo-Json)
 }
 
+for ($i = 1; $i -le 2; $i++) { 
+    $response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"header":{"bizCode":"Sample002"}, "body":{"log":"what??", "step":11}}'
+    $r1 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=12}} | ConvertTo-Json)
+    $r2 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=13}} | ConvertTo-Json)
+    $r3 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=14}} | ConvertTo-Json)
+    Write-Host ($response | ConvertTo-Json)
+    Write-Host ($r1 | ConvertTo-Json)
+    Write-Host ($r2 | ConvertTo-Json)
+    Write-Host ($r3 | ConvertTo-Json)
+}
+
 Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"header":{"bizCode":"XXX"}, "body":"error will occur!"}'
 Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample001";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
 

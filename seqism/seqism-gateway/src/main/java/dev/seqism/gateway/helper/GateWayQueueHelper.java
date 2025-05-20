@@ -5,6 +5,7 @@ import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -32,7 +33,7 @@ public class GateWayQueueHelper {
         
         createQueues(msg);
 
-        rabbitTemplate.convertAndSend(QueueNameHelper.getStaticQueueName(), msg);
+        send(QueueNameHelper.getStaticQueueName(), msg);
         return receive(msg);
     }
 
@@ -40,7 +41,7 @@ public class GateWayQueueHelper {
         log.debug("Sending message : [{}]", msg);
         String tranId = msg.getHeader().getTranId();
 
-        rabbitTemplate.convertAndSend(QueueNameHelper.getResponseQueueName(tranId), msg);
+        send(QueueNameHelper.getResponseQueueName(tranId), msg);
         return receive(msg);
     }
 
@@ -62,22 +63,34 @@ public class GateWayQueueHelper {
         rabbitAdmin.declareQueue(queue);
     }
 
+    void send(String queueName, SeqismMessage<Object> msg) {
+        try {
+            rabbitTemplate.convertAndSend(queueName, msg);
+        } catch (AmqpException e) {
+            throw new IllegalStateException("The message queue is invalid or the request is incorrect.", e);
+        }
+    }
+
     SeqismMessage<Object> receive(SeqismMessage<Object> msg) {
         String tranId = msg.getHeader().getTranId();
         
         String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
         String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
 
-        SeqismMessage<Object> receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue, RECEIVE_TIME_OUT, typeRef);
-        log.debug("Received message : [{}]", receivedMsg);
+        try {
+            SeqismMessage<Object> receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue, RECEIVE_TIME_OUT, typeRef);
+            log.debug("Received message : [{}]", receivedMsg);
 
-        // 성공 또는 실패 상태인 경우 큐 삭제
-        if (receivedMsg == null || receivedMsg.getHeader().getStatus() != SeqismMessageStatus.IN_PROGRESS) {
-            rabbitAdmin.deleteQueue(commandQueue);
-            rabbitAdmin.deleteQueue(responseQueue);
-            log.debug("Deleted queues : [{}], [{}]", commandQueue, responseQueue);
+            // 성공 또는 실패 상태인 경우 큐 삭제
+            if (receivedMsg == null || receivedMsg.getHeader().getStatus() != SeqismMessageStatus.IN_PROGRESS) {
+                rabbitAdmin.deleteQueue(commandQueue);
+                rabbitAdmin.deleteQueue(responseQueue);
+                log.debug("Deleted queues : [{}], [{}]", commandQueue, responseQueue);
+            }
+
+            return receivedMsg;
+        } catch (AmqpException e) {
+            throw new IllegalStateException("The message queue is invalid or the request is incorrect.", e);
         }
-
-        return receivedMsg;
     }
 }

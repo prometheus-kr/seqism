@@ -7,25 +7,35 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class BizProcessorSample001 implements BizProcessor<String> {
+public class BizProcessorSample001 extends BizProcessor<String> {
+
+    public BizProcessorSample001(CoreQueueHelper queueHelper) {
+        super(queueHelper);
+    }
+
     @Override
     public String getBizCode() {
         return "Sample001";
     }
 
     @Override
-    public void process(SeqismMessage<String> message, CoreQueueHelper queueHelper) {
+    public Class<String> getBodyType() {
+        return String.class;
+    }
+
+    @Override
+    public void process(SeqismMessage<String> message) {
         SeqismMessage.SeqismMessageHeader header = message.getHeader();
-        String processed = "APDU1111";
-        SeqismMessage<String> response = queueHelper.sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
+        String processed = "=====> Command_1111";
+        SeqismMessage<String> response = sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
 
-        processed = response.getBody() + "_APDU2222";
-        response = queueHelper.sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
+        processed = response.getBody() + "=====> Command_2222";
+        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
 
-        processed = response.getBody() + "_APDU3333";
-        response = queueHelper.sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
+        processed = response.getBody() + "=====> Command_3333";
+        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
 
-        processed = response.getBody() + "_APDU4444";
-        queueHelper.sendFinal(new SeqismMessage<>(header.toSuccess(), processed));
+        processed = response.getBody() + "=====> Command_4444";
+        sendFinal(new SeqismMessage<>(header.toSuccess(), processed));
     }
 }
