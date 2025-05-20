@@ -1,4 +1,4 @@
-package dev.seqism.common;
+package dev.seqism.common.helper;
 
 import dev.seqism.common.constant.SeqismConstant;
 

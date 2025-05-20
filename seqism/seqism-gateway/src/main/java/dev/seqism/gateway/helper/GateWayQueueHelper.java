@@ -1,6 +1,6 @@
-package dev.seqism.gateway;
+package dev.seqism.gateway.helper;
 
-import dev.seqism.common.QueueNameHelper;
+import dev.seqism.common.helper.QueueNameHelper;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
 import lombok.extern.slf4j.Slf4j;

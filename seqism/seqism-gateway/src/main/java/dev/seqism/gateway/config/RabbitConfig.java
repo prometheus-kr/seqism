@@ -1,4 +1,4 @@
-package dev.seqism.gateway;
+package dev.seqism.gateway.config;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;

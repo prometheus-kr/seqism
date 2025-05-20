@@ -1,8 +1,9 @@
-package dev.seqism.core;
+package dev.seqism.core.processor;
 
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageBody;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
+import dev.seqism.core.helper.CoreQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class BizProcessorBankIC implements BizProcessor {
     @Override
     public String getBizCode() {
-        return "BankIC";
+        return "Sample001";
     }
 
     @Override

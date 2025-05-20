@@ -1,8 +1,9 @@
-package dev.seqism.core;
+package dev.seqism.core.endpoint;
 
 import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageBody;
+import dev.seqism.core.helper.CoreQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;

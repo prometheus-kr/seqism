@@ -73,8 +73,6 @@ public class SeqismMessage implements Serializable {
         public String getMessage() {
             return message != null ? message.toString() : null;
         }
-
-
     }
 
     public enum SeqismMessageStatus {

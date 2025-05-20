@@ -1,6 +1,6 @@
-package dev.seqism.core;
+package dev.seqism.core.helper;
 
-import dev.seqism.common.QueueNameHelper;
+import dev.seqism.common.helper.QueueNameHelper;
 import dev.seqism.common.vo.SeqismMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
