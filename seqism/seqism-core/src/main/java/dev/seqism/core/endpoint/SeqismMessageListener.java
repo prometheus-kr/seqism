@@ -2,7 +2,6 @@ package dev.seqism.core.endpoint;
 
 import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageBody;
 import dev.seqism.core.helper.CoreQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,16 +24,16 @@ public abstract class SeqismMessageListener {
     }
 
     @RabbitListener(queues = SeqismConstant.SEQISM_STATIC_QUEUE)
-    public void handleMessage(SeqismMessage seqismMessage) {
+    public void handleMessage(SeqismMessage<Object> seqismMessage) {
         CompletableFuture.runAsync(() -> {
             try {
                 this.proc(seqismMessage);
             } catch (Exception e) {
                 log.error("An exception occurred while processing", e);
-                queueHelper.sendFinal(new SeqismMessage(seqismMessage.getHeader().toFailure(), new SeqismMessageBody(e.getMessage())));
+                queueHelper.sendFinal(new SeqismMessage<>(seqismMessage.getHeader().toFailure(), e.getMessage()));
             }
         });
     }
 
-    abstract void proc(SeqismMessage seqismMessage);
+    abstract void proc(SeqismMessage<Object> seqismMessage);
 }

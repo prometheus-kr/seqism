@@ -20,14 +20,14 @@ public class GateWayQueueHelper {
 
     private final RabbitAdmin rabbitAdmin;
     private final RabbitTemplate rabbitTemplate;
-    private final ParameterizedTypeReference<SeqismMessage> typeRef = new ParameterizedTypeReference<SeqismMessage>() {};
+    private final ParameterizedTypeReference<SeqismMessage<Object>> typeRef = new ParameterizedTypeReference<SeqismMessage<Object>>() {};
 
     public GateWayQueueHelper(RabbitAdmin rabbitAdmin, RabbitTemplate rabbitTemplate) {
         this.rabbitAdmin = rabbitAdmin;
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public SeqismMessage sendAndReceiveInit(SeqismMessage msg) {
+    public SeqismMessage<Object> sendAndReceiveInit(SeqismMessage<Object> msg) {
         log.debug("Sending message : [{}]", msg);
         
         createQueues(msg);
@@ -36,16 +36,19 @@ public class GateWayQueueHelper {
         return receive(msg);
     }
 
-    public SeqismMessage sendAndReceiveNext(SeqismMessage msg) {
+    public SeqismMessage<Object> sendAndReceiveNext(SeqismMessage<Object> msg) {
         log.debug("Sending message : [{}]", msg);
+        String tranId = msg.getHeader().getTranId();
 
-        rabbitTemplate.convertAndSend(QueueNameHelper.getResponseQueueName(msg.getHeader().getTranId()), msg);
+        rabbitTemplate.convertAndSend(QueueNameHelper.getResponseQueueName(tranId), msg);
         return receive(msg);
     }
 
-    void createQueues(SeqismMessage msg) {
-        String commandQueue = QueueNameHelper.getCommandQueueName(msg.getHeader().getTranId());
-        String responseQueue = QueueNameHelper.getResponseQueueName(msg.getHeader().getTranId());
+    void createQueues(SeqismMessage<Object> msg) {
+        String tranId = msg.getHeader().getTranId();
+
+        String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
+        String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
 
         declareQueue(commandQueue);
         declareQueue(responseQueue);
@@ -59,11 +62,13 @@ public class GateWayQueueHelper {
         rabbitAdmin.declareQueue(queue);
     }
 
-    SeqismMessage receive(SeqismMessage msg) {
-        String commandQueue = QueueNameHelper.getCommandQueueName(msg.getHeader().getTranId());
-        String responseQueue = QueueNameHelper.getResponseQueueName(msg.getHeader().getTranId());
+    SeqismMessage<Object> receive(SeqismMessage<Object> msg) {
+        String tranId = msg.getHeader().getTranId();
+        
+        String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
+        String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
 
-        SeqismMessage receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue, RECEIVE_TIME_OUT, typeRef);
+        SeqismMessage<Object> receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue, RECEIVE_TIME_OUT, typeRef);
         log.debug("Received message : [{}]", receivedMsg);
 
         // 성공 또는 실패 상태인 경우 큐 삭제

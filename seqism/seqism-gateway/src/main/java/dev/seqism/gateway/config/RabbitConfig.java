@@ -9,6 +9,8 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.seqism.common.constant.SeqismConstant;
+
 /**
  * RabbitConfig
  *
@@ -38,6 +40,6 @@ public class RabbitConfig {
     
     @Bean
     public Queue queue() {
-        return new Queue("seqism-static-queue");
+        return new Queue(SeqismConstant.SEQISM_STATIC_QUEUE);
     }
 }

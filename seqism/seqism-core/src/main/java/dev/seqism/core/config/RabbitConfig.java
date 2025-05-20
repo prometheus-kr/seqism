@@ -3,10 +3,13 @@ package dev.seqism.core.config;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import dev.seqism.common.constant.SeqismConstant;
 
 /**
  * RabbitConfig
@@ -29,9 +32,14 @@ public class RabbitConfig {
         template.setMessageConverter(jackson2JsonMessageConverter);
         return template;
     }
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(RabbitTemplate rabbitTemplate) {
+        return new RabbitAdmin(rabbitTemplate);
+    }
     
     @Bean
     public Queue queue() {
-        return new Queue("seqism-static-queue");
+        return new Queue(SeqismConstant.SEQISM_STATIC_QUEUE);
     }
 }

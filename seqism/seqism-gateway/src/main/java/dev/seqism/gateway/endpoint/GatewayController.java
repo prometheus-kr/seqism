@@ -1,8 +1,6 @@
 package dev.seqism.gateway.endpoint;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageBody;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
 import dev.seqism.gateway.helper.GateWayQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,22 +28,22 @@ public class GatewayController {
     }
 
     @PostMapping("/init")
-    public ResponseEntity<SeqismMessage> initSeqism(@RequestBody SeqismMessage request) {
-        return initSeqism0(new SeqismMessage(SeqismMessageHeader.inProgress(request.getHeader().getBizCode(), generateTranId()), request.getBody()));
+    public ResponseEntity<SeqismMessage<Object>> initSeqism(@RequestBody SeqismMessage<Object> request) {
+        return initSeqism0(new SeqismMessage<>(SeqismMessage.SeqismMessageHeader.inProgress(request.getHeader().getBizCode(), generateTranId()), request.getBody()));
     }
 
     @PostMapping("/next")
-    public ResponseEntity<SeqismMessage> nextSeqism(@RequestBody SeqismMessage request) {
-        return nextSeqism0(new SeqismMessage(request.getHeader().toInProgress(), request.getBody()));
+    public ResponseEntity<SeqismMessage<Object>> nextSeqism(@RequestBody SeqismMessage<Object> request) {
+        return nextSeqism0(new SeqismMessage<>(request.getHeader().toInProgress(), request.getBody()));
     }
 
     String generateTranId() {
         return UUID.randomUUID().toString();
     }
 
-    ResponseEntity<SeqismMessage> initSeqism0(SeqismMessage message) {
+    ResponseEntity<SeqismMessage<Object>> initSeqism0(SeqismMessage<Object> message) {
         try {
-            SeqismMessage response = queueHelper.sendAndReceiveInit(message);
+            SeqismMessage<Object> response = queueHelper.sendAndReceiveInit(message);
             if (response == null) {
                 throw new IllegalStateException("No response from MQ (timeout) or invalid request");
             }
@@ -57,9 +55,9 @@ public class GatewayController {
         }
     }
 
-    ResponseEntity<SeqismMessage> nextSeqism0(SeqismMessage message) {
+    ResponseEntity<SeqismMessage<Object>> nextSeqism0(SeqismMessage<Object> message) {
         try {
-            SeqismMessage response = queueHelper.sendAndReceiveNext(message);
+            SeqismMessage<Object> response = queueHelper.sendAndReceiveNext(message);
             if (response == null) {
                 throw new IllegalStateException("No response from MQ (timeout) or invalid request");
             }
@@ -71,11 +69,11 @@ public class GatewayController {
         }
     }
 
-    ResponseEntity<SeqismMessage> buildResponseEntity(SeqismMessage message) {
+    ResponseEntity<SeqismMessage<Object>> buildResponseEntity(SeqismMessage<Object> message) {
         return ResponseEntity.ok(message);
     }
 
-    ResponseEntity<SeqismMessage> buildFailureResponseEntity(SeqismMessageHeader header, String errorMessage) {
-        return ResponseEntity.ok(new SeqismMessage(header.toFailure(), new SeqismMessageBody(errorMessage)));
+    ResponseEntity<SeqismMessage<Object>> buildFailureResponseEntity(SeqismMessage.SeqismMessageHeader header, String errorMessage) {
+        return ResponseEntity.ok(new SeqismMessage<>(header.toFailure(), errorMessage));
     }
 }

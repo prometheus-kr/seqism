@@ -3,21 +3,19 @@ package dev.seqism.common.vo;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 @Data
 @AllArgsConstructor
-public class SeqismMessage implements Serializable {
+public class SeqismMessage<T> implements Serializable {
     private final SeqismMessageHeader header;
-    private final SeqismMessageBody body;
+    private final T body;
 
     public SeqismMessage() {
         this(new SeqismMessageHeader(), null);
     }
 
-    public SeqismMessage(String errorMessage) {
-        this(new SeqismMessageHeader(), new SeqismMessageBody(errorMessage));
+    public SeqismMessage(T errorBody) {
+        this(new SeqismMessageHeader(), errorBody);
     }
 
     @Data
@@ -57,21 +55,6 @@ public class SeqismMessage implements Serializable {
 
         public static SeqismMessageHeader failure(String bizCode, String tranId) {
             return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.FAILURE);
-        }
-    }
-
-    @ToString
-    @EqualsAndHashCode
-    @AllArgsConstructor
-    public static class SeqismMessageBody implements Serializable {
-        private final Object message;
-
-        public SeqismMessageBody() {
-            this(null);
-        }
-
-        public String getMessage() {
-            return message != null ? message.toString() : null;
         }
     }
 
