@@ -1,8 +1,7 @@
 package dev.seqism.gateway;
 
-import dev.seqism.common.constant.SeqismConstant;
+import dev.seqism.common.QueueNameHelper;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageType;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.amqp.core.Queue;
@@ -11,7 +10,6 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -28,42 +26,29 @@ public class GateWayQueueHelper {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public SeqismMessage sendAndReceiveInit(String message) {
-        String tranId = generateTranId();
-        log.debug("tranId : [{}]", tranId);
-
-        createQueues(tranId);
-
-        SeqismMessage msg = new SeqismMessage(tranId, message);
+    public SeqismMessage sendAndReceiveInit(SeqismMessage msg) {
         log.debug("Sending message : [{}]", msg);
+        
+        createQueues(msg);
 
-        rabbitTemplate.convertAndSend(SeqismConstant.SEQISM_STATIC_QUEUE, msg);
-        return receive(tranId);
+        rabbitTemplate.convertAndSend(QueueNameHelper.getStaticQueueName(), msg);
+        return receive(msg);
     }
 
     public SeqismMessage sendAndReceiveNext(SeqismMessage msg) {
         log.debug("Sending message : [{}]", msg);
-        String tranId = msg.getTranId();
 
-        rabbitTemplate.convertAndSend(getResponseQueueName(tranId), msg);
-        return receive(tranId);
+        rabbitTemplate.convertAndSend(QueueNameHelper.getResponseQueueName(msg.getHeader().getTranId()), msg);
+        return receive(msg);
     }
 
-    String generateTranId() {
-        return UUID.randomUUID().toString();
-    }
+    void createQueues(SeqismMessage msg) {
+        String commandQueue = QueueNameHelper.getCommandQueueName(msg.getHeader().getTranId());
+        String responseQueue = QueueNameHelper.getResponseQueueName(msg.getHeader().getTranId());
 
-    void createQueues(String tranId) {
-        declareQueue(getCommandQueueName(tranId));
-        declareQueue(getResponseQueueName(tranId));
-    }
-
-    String getCommandQueueName(String tranId) {
-        return SeqismConstant.COMMAND_QUEUE_PREFIX + tranId;
-    }
-
-    String getResponseQueueName(String tranId) {
-        return SeqismConstant.RESPONSE_QUEUE_PREFIX + tranId;
+        declareQueue(commandQueue);
+        declareQueue(responseQueue);
+        log.debug("Created queues : [{}], [{}]", commandQueue, responseQueue);
     }
 
     void declareQueue(String queueName) {
@@ -73,19 +58,20 @@ public class GateWayQueueHelper {
         rabbitAdmin.declareQueue(queue);
     }
 
-    private SeqismMessage receive(String tranId) {
-        SeqismMessage receivedMsg = rabbitTemplate.receiveAndConvert(getCommandQueueName(tranId), RECEIVE_TIME_OUT, typeRef);
+    SeqismMessage receive(SeqismMessage msg) {
+        String commandQueue = QueueNameHelper.getCommandQueueName(msg.getHeader().getTranId());
+        String responseQueue = QueueNameHelper.getResponseQueueName(msg.getHeader().getTranId());
+
+        SeqismMessage receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue, RECEIVE_TIME_OUT, typeRef);
         log.debug("Received message : [{}]", receivedMsg);
 
-        deleteQueuesIfNecessary(receivedMsg, tranId);
+        // 성공 또는 실패 상태인 경우 큐 삭제
+        if (receivedMsg == null || !receivedMsg.isInProgress()) {
+            rabbitAdmin.deleteQueue(commandQueue);
+            rabbitAdmin.deleteQueue(responseQueue);
+            log.debug("Deleted queues : [{}], [{}]", commandQueue, responseQueue);
+        }
 
         return receivedMsg;
-    }
-
-    void deleteQueuesIfNecessary(SeqismMessage msg, String tranId) {
-        if (msg == null || msg.getType() != SeqismMessageType.IN_PROGRESS) {
-            rabbitAdmin.deleteQueue(getResponseQueueName(tranId));
-            rabbitAdmin.deleteQueue(getCommandQueueName(tranId));
-        }
     }
 }

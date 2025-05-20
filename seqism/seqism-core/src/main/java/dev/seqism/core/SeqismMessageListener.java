@@ -2,7 +2,6 @@ package dev.seqism.core;
 
 import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +29,7 @@ public abstract class SeqismMessageListener {
                 this.proc(seqismMessage);
             } catch (Exception e) {
                 log.error("An exception occurred while processing", e);
-                queueHelper.sendFinal(new SeqismMessage(seqismMessage.getTranId(), SeqismMessageType.FAILURE, e.getMessage()));
+                queueHelper.sendFinal(new SeqismMessage(seqismMessage.getHeader().toFailure(), e.getMessage()));
             }
         });
     }

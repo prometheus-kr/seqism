@@ -1,6 +1,6 @@
 package dev.seqism.core;
 
-import dev.seqism.common.constant.SeqismConstant;
+import dev.seqism.common.QueueNameHelper;
 import dev.seqism.common.vo.SeqismMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -13,37 +13,38 @@ public class CoreQueueHelper {
     private static final int RECEIVE_TIME_OUT = 5000;
     
     private final RabbitTemplate rabbitTemplate;
-    private final ParameterizedTypeReference<SeqismMessage> seqismMessageTypeRef = new ParameterizedTypeReference<SeqismMessage>() {};
+    private final ParameterizedTypeReference<SeqismMessage> typeRef = new ParameterizedTypeReference<SeqismMessage>() {};
 
     public CoreQueueHelper(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
     public SeqismMessage sendAndReceiveOrThrow(SeqismMessage msg) {
-        log.debug("Sending message : [{}]", msg);
-        String tranId = msg.getTranId();
-        
-        rabbitTemplate.convertAndSend(getCommandQueueName(tranId), msg);
-        SeqismMessage receivedMsg = rabbitTemplate.receiveAndConvert(getResponseQueueName(tranId), RECEIVE_TIME_OUT, seqismMessageTypeRef);
-        log.debug("Received message : [{}]", receivedMsg);
-        if (receivedMsg == null) {
-            log.error("Timeout occurred while waiting for response from queue : [{}]", getResponseQueueName(tranId));
-            throw new RuntimeException("Timeout occurred while waiting for response from queue");
-        }
+        sendMessage(msg);
 
-        return receivedMsg;
+        return receivedMessage(msg);
     }
 
     public void sendFinal(SeqismMessage msg) {
-        log.debug("Final Sending message : [{}]", msg);
-        rabbitTemplate.convertAndSend(getCommandQueueName(msg.getTranId()), msg);
+        sendMessage(msg);
     }
 
-    String getCommandQueueName(String tranId) {
-        return SeqismConstant.COMMAND_QUEUE_PREFIX + tranId;
+    void sendMessage(SeqismMessage msg) {
+        log.debug("Sending message : [{}]", msg);
+
+        rabbitTemplate.convertAndSend(QueueNameHelper.getCommandQueueName(msg.getHeader().getTranId()), msg);
     }
 
-    String getResponseQueueName(String tranId) {
-        return SeqismConstant.RESPONSE_QUEUE_PREFIX + tranId;
+    SeqismMessage receivedMessage(SeqismMessage msg) {
+        String responseQueueName = QueueNameHelper.getResponseQueueName(msg.getHeader().getTranId());
+
+        SeqismMessage receivedMsg = rabbitTemplate.receiveAndConvert(responseQueueName, RECEIVE_TIME_OUT, typeRef);
+        if (receivedMsg == null) {
+            log.error("Timeout occurred while waiting for response from queue : [{}]", responseQueueName);
+            throw new RuntimeException("Timeout occurred while waiting for response from queue");
+        }
+
+        log.debug("Received message : [{}]", receivedMsg);
+        return receivedMsg;
     }
 }
