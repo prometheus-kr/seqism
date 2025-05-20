@@ -2,6 +2,7 @@ package dev.seqism.gateway;
 
 import dev.seqism.common.QueueNameHelper;
 import dev.seqism.common.vo.SeqismMessage;
+import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.amqp.core.Queue;
@@ -66,7 +67,7 @@ public class GateWayQueueHelper {
         log.debug("Received message : [{}]", receivedMsg);
 
         // 성공 또는 실패 상태인 경우 큐 삭제
-        if (receivedMsg == null || !receivedMsg.isInProgress()) {
+        if (receivedMsg == null || receivedMsg.getHeader().getStatus() != SeqismMessageStatus.IN_PROGRESS) {
             rabbitAdmin.deleteQueue(commandQueue);
             rabbitAdmin.deleteQueue(responseQueue);
             log.debug("Deleted queues : [{}], [{}]", commandQueue, responseQueue);

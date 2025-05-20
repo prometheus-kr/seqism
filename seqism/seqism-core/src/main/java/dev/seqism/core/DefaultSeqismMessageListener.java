@@ -1,6 +1,7 @@
 package dev.seqism.core;
 
 import dev.seqism.common.vo.SeqismMessage;
+import dev.seqism.common.vo.SeqismMessage.SeqismMessageBody;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener {
             processor.process(seqismMessage, queueHelper);
         } else {
             log.error("No processor found for bizCode : [{}]", bizCode);
-            queueHelper.sendFinal(new SeqismMessage(seqismMessage.getHeader().toFailure(), "No processor found for bizCode : " + bizCode));
+            queueHelper.sendFinal(new SeqismMessage(seqismMessage.getHeader().toFailure(), new SeqismMessageBody("No processor found for bizCode : " + bizCode)));
         }
     }
 }

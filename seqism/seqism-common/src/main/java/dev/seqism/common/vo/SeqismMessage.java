@@ -1,26 +1,23 @@
 package dev.seqism.common.vo;
 
 import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @AllArgsConstructor
 public class SeqismMessage implements Serializable {
     private final SeqismMessageHeader header;
-    private final String message;
+    private final SeqismMessageBody body;
 
     public SeqismMessage() {
         this(new SeqismMessageHeader(), null);
     }
 
     public SeqismMessage(String errorMessage) {
-        this(new SeqismMessageHeader(), errorMessage);
-    }
-
-    public boolean isInProgress() {
-        return this.header.status == SeqismMessageStatus.IN_PROGRESS;
+        this(new SeqismMessageHeader(), new SeqismMessageBody(errorMessage));
     }
 
     @Data
@@ -38,6 +35,10 @@ public class SeqismMessage implements Serializable {
             this(bizCode, tranId, SeqismMessageStatus.IN_PROGRESS);
         }
 
+        public SeqismMessageHeader toInProgress() {
+            return inProgress(bizCode, tranId);
+        }
+
         public SeqismMessageHeader toSuccess() {
             return success(bizCode, tranId);
         }
@@ -46,20 +47,34 @@ public class SeqismMessage implements Serializable {
             return failure(bizCode, tranId);
         }
 
-        // 진행중 Header 생성
         public static SeqismMessageHeader inProgress(String bizCode, String tranId) {
             return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.IN_PROGRESS);
         }
 
-        // 성공 Header 생성
         public static SeqismMessageHeader success(String bizCode, String tranId) {
             return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.SUCCESS);
         }
 
-        // 실패 Header 생성
         public static SeqismMessageHeader failure(String bizCode, String tranId) {
             return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.FAILURE);
         }
+    }
+
+    @ToString
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    public static class SeqismMessageBody implements Serializable {
+        private final Object message;
+
+        public SeqismMessageBody() {
+            this(null);
+        }
+
+        public String getMessage() {
+            return message != null ? message.toString() : null;
+        }
+
+
     }
 
     public enum SeqismMessageStatus {

@@ -43,12 +43,14 @@ if (-not $testOnly) {
 # 6️⃣ Gateway로 테스트 메시지 전송
 Write-Host "Sending test message to Gateway..."
 for ($i = 1; $i -le 2; $i++) { 
-    $response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"bizCode":"BankIC", "message": "Hello, Seqism!"}'
-    $r1 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{tranId=$response.header.tranId; bizCode="BankIC"; message="Hello, Seqism!"} | ConvertTo-Json)
-    $r2 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{tranId=$response.header.tranId; bizCode="BankIC"; message="Hello, Seqism!"} | ConvertTo-Json)
+    $response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"header":{"bizCode":"BankIC"}, "body":{"message": "Hello, Seqism!"}}'
+    $r1 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="BankIC";tranId=$response.header.tranId;}; body=@{message="Hello, Seqism!"}} | ConvertTo-Json)
+    $r2 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="BankIC";tranId=$response.header.tranId;}; body=@{message="Hello, Seqism!"}} | ConvertTo-Json)
+    $r3 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="BankIC";tranId=$response.header.tranId;}; body=@{message="Hello, Seqism!"}} | ConvertTo-Json)
     Write-Host ($response | ConvertTo-Json)
     Write-Host ($r1 | ConvertTo-Json)
     Write-Host ($r2 | ConvertTo-Json)
+    Write-Host ($r3 | ConvertTo-Json)
 }
 
 Write-Host "Test completed!"
