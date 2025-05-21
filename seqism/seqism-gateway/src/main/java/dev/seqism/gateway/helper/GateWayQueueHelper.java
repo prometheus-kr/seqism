@@ -65,9 +65,13 @@ public class GateWayQueueHelper {
 
     void send(String queueName, SeqismMessage<Object> msg) {
         try {
+            if (rabbitAdmin.getQueueProperties(queueName) == null) {
+                throw new IllegalStateException("Queue does not exist ");
+            }
+            
             rabbitTemplate.convertAndSend(queueName, msg);
         } catch (AmqpException e) {
-            throw new IllegalStateException("The message queue is invalid or the request is incorrect.", e);
+            throw new IllegalStateException("Failed to send message to MQ.", e);
         }
     }
 
@@ -90,7 +94,7 @@ public class GateWayQueueHelper {
 
             return receivedMsg;
         } catch (AmqpException e) {
-            throw new IllegalStateException("The message queue is invalid or the request is incorrect.", e);
+            throw new IllegalStateException("Failed to receive message from MQ.", e);
         }
     }
 }

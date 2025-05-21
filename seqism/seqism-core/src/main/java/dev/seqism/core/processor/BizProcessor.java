@@ -6,10 +6,11 @@ import dev.seqism.core.helper.CoreQueueHelper;
 
 public abstract class BizProcessor<T> {
     protected final CoreQueueHelper queueHelper;
-    protected final ObjectMapper mapper = new ObjectMapper();
+    protected final ObjectMapper mapper;
 
-    public BizProcessor(CoreQueueHelper queueHelper) {
+    public BizProcessor(CoreQueueHelper queueHelper, ObjectMapper mapper) {
         this.queueHelper = queueHelper;
+        this.mapper = mapper;
     }
     
     protected SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> msg) {

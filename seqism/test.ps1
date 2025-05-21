@@ -1,70 +1,157 @@
-param(
-    [switch]$testOnly
-)
-
-if (-not $testOnly) {
-    # 1️⃣ 루트에서 전체 빌드
-    Write-Host "Building all Maven modules (including seqism-common)..."
-    mvn clean install
-
-    # 2️⃣ 기존 Docker 컨테이너 종료
-    Write-Host "Stopping existing containers..."
-    docker compose down
-
-    # 3️⃣ Docker 컨테이너 다시 시작
-    Write-Host "Starting containers..."
-    docker compose up --build -d
-
-    # 4️⃣ RabbitMQ가 정상 기동될 때까지 대기
-    Write-Host "Waiting for RabbitMQ to be ready..."
-    do {
-        Start-Sleep -Seconds 1
-        $status = docker exec seqism-mq rabbitmqctl status 2>&1
-        if ($status -match "Error") {
-            Write-Host "RabbitMQ is not ready yet. Checking again in 1 second..."
-        }
-    } until ($status -match "Status of node")
-    Write-Host "RabbitMQ is ready!"
-
-    # 5️⃣ Gateway가 준비될 때까지 대기
-    Write-Host "Waiting for Gateway to be ready..."
-    do {
-        Start-Sleep -Seconds 1
-        try {
-            $response = Invoke-RestMethod -Uri "http://localhost:8080/actuator/health" -Method "Get" -TimeoutSec 2
-            $ready = $response.status -eq "UP"
-        } catch {
-            $ready = $false
-        }
-    } until ($ready)
-    Write-Host "Gateway is ready!"
+function Check-SeqismResponse {
+    param(
+        $resp,
+        [string[]]$expectedStatus = @("IN_PROGRESS", "SUCCESS") # 기본값: 정상 처리
+    )
+    if ($null -eq $resp) {
+        Write-Host "응답이 없습니다." -ForegroundColor Red
+        return
+    }
+    $status = $resp.header.status
+    if ($expectedStatus -notcontains $status) {
+        Write-Host "❌ 예상과 다른 상태! status: $status, message: $($resp.body)" -ForegroundColor Red
+    } else {
+        Write-Host "✅ 예상된 정상 상태: $status"
+    }
 }
 
-# 6️⃣ Gateway로 테스트 메시지 전송
+
 Write-Host "Sending test message to Gateway..."
+
 for ($i = 1; $i -le 2; $i++) { 
     $response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"header":{"bizCode":"Sample001"}, "body":"Hello, Seqism!"}'
+    Check-SeqismResponse $response @("IN_PROGRESS")
+    Write-Host ($response | ConvertTo-Json -Depth 5)
+
     $r1 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample001";tranId=$response.header.tranId;}; body="Hello, Seqism!"} | ConvertTo-Json)
+    Check-SeqismResponse $r1 @("IN_PROGRESS")
+    Write-Host ($r1 | ConvertTo-Json -Depth 5)
+
     $r2 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample001";tranId=$response.header.tranId;}; body="Hello, Seqism!"} | ConvertTo-Json)
+    Check-SeqismResponse $r2 @("IN_PROGRESS")
+    Write-Host ($r2 | ConvertTo-Json -Depth 5)
+
     $r3 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample001";tranId=$response.header.tranId;}; body="Hello, Seqism!"} | ConvertTo-Json)
-    Write-Host ($response | ConvertTo-Json)
-    Write-Host ($r1 | ConvertTo-Json)
-    Write-Host ($r2 | ConvertTo-Json)
-    Write-Host ($r3 | ConvertTo-Json)
+    Check-SeqismResponse $r3 @("SUCCESS")
+    Write-Host ($r3 | ConvertTo-Json -Depth 5)
 }
 
 for ($i = 1; $i -le 2; $i++) { 
     $response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"header":{"bizCode":"Sample002"}, "body":{"log":"what??", "step":11}}'
+    Check-SeqismResponse $response @("IN_PROGRESS")
+    Write-Host ($response | ConvertTo-Json -Depth 5)
+
     $r1 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=12}} | ConvertTo-Json)
+    Check-SeqismResponse $r1 @("IN_PROGRESS")
+    Write-Host ($r1 | ConvertTo-Json -Depth 5)
+
     $r2 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=13}} | ConvertTo-Json)
+    Check-SeqismResponse $r2 @("IN_PROGRESS")
+    Write-Host ($r2 | ConvertTo-Json -Depth 5)
+
     $r3 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=14}} | ConvertTo-Json)
-    Write-Host ($response | ConvertTo-Json)
-    Write-Host ($r1 | ConvertTo-Json)
-    Write-Host ($r2 | ConvertTo-Json)
-    Write-Host ($r3 | ConvertTo-Json)
+    Check-SeqismResponse $r3 @("SUCCESS")
+    Write-Host ($r3 | ConvertTo-Json -Depth 5)
 }
 
-Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"header":{"bizCode":"XXX"}, "body":"error will occur!"}'
-Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample001";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+for ($i = 1; $i -le 2; $i++) { 
+    $response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{
+        "header":{"bizCode":"Sample003"},
+        "body":{
+            "userId":"userA",
+            "transactions":[],
+            "meta":{"requestIp":"127.0.0.1","deviceType":"PC"}
+        }
+    }'
+    Check-SeqismResponse $response @("IN_PROGRESS")
+    Write-Host ($response | ConvertTo-Json -Depth 5)
+
+    $transactions = @(
+        [PSCustomObject]@{ txnId = $response.body.transactions[0].txnId; amount = $response.body.transactions[0].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[0].status }
+    )
+    $r1 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{
+        header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+        body = @{
+            userId = "userA"
+            transactions = $transactions
+            meta = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
+        }
+    } | ConvertTo-Json -Depth 5)
+    Check-SeqismResponse $r1 @("IN_PROGRESS")
+    Write-Host ($r1 | ConvertTo-Json -Depth 5)
+
+    $transactions = @(
+        [PSCustomObject]@{ txnId = $response.body.transactions[0].txnId; amount = $response.body.transactions[0].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[0].status }
+        [PSCustomObject]@{ txnId = $response.body.transactions[1].txnId; amount = $response.body.transactions[1].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[1].status }
+    )
+    $r2 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{
+        header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+        body = @{
+            userId = "userA"
+            transactions = $transactions
+            meta = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
+        }
+    } | ConvertTo-Json -Depth 5)
+    Check-SeqismResponse $r2 @("IN_PROGRESS")
+    Write-Host ($r2 | ConvertTo-Json -Depth 5)
+
+    $transactions = @(
+        [PSCustomObject]@{ txnId = $response.body.transactions[0].txnId; amount = $response.body.transactions[0].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[0].status }
+        [PSCustomObject]@{ txnId = $response.body.transactions[1].txnId; amount = $response.body.transactions[1].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[1].status }
+        [PSCustomObject]@{ txnId = $response.body.transactions[2].txnId; amount = $response.body.transactions[2].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[2].status }
+    )
+    $r3 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{
+        header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+        body = @{
+            userId = "userA"
+            transactions = $transactions
+            meta = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
+        }
+    } | ConvertTo-Json -Depth 5)
+    Check-SeqismResponse $r3 @("SUCCESS")
+    Write-Host ($r3 | ConvertTo-Json -Depth 5)
+}
+
+$response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{"header":{"bizCode":"XXX"}, "body":"error will occur!"}'
+Check-SeqismResponse $response @("FAILURE")
+Write-Host ($response | ConvertTo-Json -Depth 5)
+
+$response = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample001";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+Check-SeqismResponse $response @("FAILURE")
+Write-Host ($response | ConvertTo-Json -Depth 5)
+
+$response = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample002";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+Check-SeqismResponse $response @("FAILURE")
+Write-Host ($response | ConvertTo-Json -Depth 5)
+
+$response = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{header=@{bizCode="Sample003";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+Check-SeqismResponse $response @("FAILURE")
+Write-Host ($response | ConvertTo-Json -Depth 5)
+
+
+
+$response = Invoke-RestMethod -Uri "http://localhost:8080/api/init" -Method "Post" -ContentType "application/json" -Body '{
+    "header":{"bizCode":"Sample003"},
+    "body":{
+        "xxxxx":"xxxxxxx",
+        "transactions":[],
+        "meta":{"requestIp":"127.0.0.1","xxxx":"xxxxxx"}
+    }
+}'
+Check-SeqismResponse $response @("IN_PROGRESS")
+Write-Host ($response | ConvertTo-Json -Depth 5)
+
+$transactions = @(
+    [PSCustomObject]@{ txnId = $response.body.transactions[0].txnId; amount = $response.body.transactions[0].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[0].status }
+)
+$r1 = Invoke-RestMethod -Uri "http://localhost:8080/api/next" -Method "Post" -ContentType "application/json" -Body (@{
+    header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+    body = @{
+        dummy = "dummy"
+        transactions = $transactions
+    }
+} | ConvertTo-Json -Depth 5)
+Check-SeqismResponse $r1 @("IN_PROGRESS")
+Write-Host ($r1 | ConvertTo-Json -Depth 5)
 
 Write-Host "Test completed!"

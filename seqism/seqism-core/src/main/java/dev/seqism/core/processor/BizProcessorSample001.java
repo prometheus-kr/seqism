@@ -5,12 +5,14 @@ import dev.seqism.core.helper.CoreQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Slf4j
 @Component
 public class BizProcessorSample001 extends BizProcessor<String> {
 
-    public BizProcessorSample001(CoreQueueHelper queueHelper) {
-        super(queueHelper);
+    public BizProcessorSample001(CoreQueueHelper queueHelper, ObjectMapper mapper) {
+        super(queueHelper, mapper);
     }
 
     @Override

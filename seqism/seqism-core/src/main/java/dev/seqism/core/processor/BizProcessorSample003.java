@@ -1,0 +1,92 @@
+package dev.seqism.core.processor;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.seqism.common.vo.SeqismMessage;
+import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
+import dev.seqism.core.helper.CoreQueueHelper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Slf4j
+@Component
+public class BizProcessorSample003 extends BizProcessor<BizProcessorSample003.Sample003Body> {
+
+    public BizProcessorSample003(CoreQueueHelper queueHelper, ObjectMapper mapper) {
+        super(queueHelper, mapper);
+    }
+
+    @Override
+    public String getBizCode() {
+        return "Sample003";
+    }
+
+    @Override
+    public Class<Sample003Body> getBodyType() {
+        return Sample003Body.class;
+    }
+
+    @Override
+    public void process(SeqismMessage<Sample003Body> message) {
+        SeqismMessageHeader header = message.getHeader();
+        Sample003Body body = message.getBody();
+
+        // Step 1: Add a new transaction
+        body.getTransactions().add(new Transaction("TXN-001", 1000, LocalDateTime.now(), "INIT"));
+        SeqismMessage<Sample003Body> response = sendAndReceiveOrThrow(new SeqismMessage<>(header, body));
+
+        // Step 2: Update status of last transaction
+        Sample003Body respBody = response.getBody();
+        Transaction lastTxn = respBody.getTransactions().get(respBody.getTransactions().size() - 1);
+        lastTxn.setStatus("STEP2");
+        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, respBody));
+
+        // Step 3: Add another transaction
+        respBody = response.getBody();
+        respBody.getTransactions().add(new Transaction("TXN-002", 2000, LocalDateTime.now(), "STEP3"));
+        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, respBody));
+
+        // Step 4: Mark all as completed
+        respBody = response.getBody();
+        for (Transaction txn : respBody.getTransactions()) {
+            txn.setStatus("DONE");
+        }
+        sendFinal(new SeqismMessage<>(header.toSuccess(), respBody));
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Sample003Body implements Serializable {
+        private String userId;
+        private List<Transaction> transactions;
+        private Meta meta;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Transaction implements Serializable {
+        private String txnId;
+        private int amount;
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime timestamp;
+        private String status;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Meta implements Serializable {
+        private String requestIp;
+        private String deviceType;
+    }
+}

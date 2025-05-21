@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BizProcessorSample002 extends BizProcessor<BizProcessorSample002.Sample002Body> {
 
-    public BizProcessorSample002(CoreQueueHelper queueHelper) {
-        super(queueHelper);
+    public BizProcessorSample002(CoreQueueHelper queueHelper, ObjectMapper mapper) {
+        super(queueHelper, mapper);
     }
 
     @Override

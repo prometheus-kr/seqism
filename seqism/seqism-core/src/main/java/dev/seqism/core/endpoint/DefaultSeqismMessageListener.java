@@ -21,11 +21,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Slf4j
 @Component
 public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
     private final Map<String, BizProcessor<?>> processorMap;
 
-    DefaultSeqismMessageListener(CoreQueueHelper queueHelper, List<BizProcessor<?>> processors) {
+    DefaultSeqismMessageListener(CoreQueueHelper queueHelper, ObjectMapper mapper, List<BizProcessor<?>> processors) {
         super(queueHelper);
+        this.mapper = mapper;
         this.processorMap = processors.stream().collect(Collectors.toMap(BizProcessor::getBizCode, p -> p));
     }
 
@@ -38,7 +39,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
             callProcessor(processor, seqismMessage);
         } else {
             log.error("No processor found for bizCode : [{}]", bizCode);
-            queueHelper.sendFinal(new SeqismMessage<>(seqismMessage.getHeader().toFailure(), "No processor found for bizCode : " + bizCode));
+            queueHelper.sendFinal(new SeqismMessage<>(seqismMessage.getHeader().toFailure(), "Error : No processor found for bizCode[" + bizCode + "]"));
         }
     }
 
