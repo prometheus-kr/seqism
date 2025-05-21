@@ -20,12 +20,20 @@ public class SeqismMessage<T> implements Serializable {
         this.body = null;
     }
 
+    public SeqismMessage<T> toFailure(ErrorInfo errorInfo) {
+        return of(header.toFailure(errorInfo), null);
+    }
+
     public SeqismMessage<T> toFailure(ErrorInfo errorInfo, String message) {
-        return new SeqismMessage<T>(header.toFailure(errorInfo.addMessage(message)));
+        return of(header.toFailure(errorInfo.addMessage(message)), null);
     }
 
     public <N> SeqismMessage<N> withBody(N body) {
-        return new SeqismMessage<N>(header, body);
+        return of(header, body);
+    }
+
+    public static <T> SeqismMessage<T> of(SeqismMessageHeader header, T body) {
+        return new SeqismMessage<T>(header, body);
     }
 
     @Data

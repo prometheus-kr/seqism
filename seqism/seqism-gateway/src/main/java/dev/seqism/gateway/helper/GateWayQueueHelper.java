@@ -1,6 +1,9 @@
 package dev.seqism.gateway.helper;
 
+import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.helper.QueueNameHelper;
+import dev.seqism.common.vo.ErrorInfo;
+import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +19,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class GateWayQueueHelper {
-    private static final int RECEIVE_TIME_OUT = 5000;
-    private static final int QUEUE_DELETE_TIME = 60000;
-
     private final RabbitAdmin rabbitAdmin;
     private final RabbitTemplate rabbitTemplate;
     private final ParameterizedTypeReference<SeqismMessage<Object>> typeRef = new ParameterizedTypeReference<SeqismMessage<Object>>() {};
@@ -28,25 +28,25 @@ public class GateWayQueueHelper {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public SeqismMessage<Object> sendAndReceiveInit(SeqismMessage<Object> msg) {
-        log.debug("Sending message : [{}]", msg);
-        
-        createQueues(msg);
+    public SeqismMessage<Object> sendAndReceiveInit(SeqismMessage<Object> message) {
+        log.debug("Sending message : [{}]", message);
 
-        send(QueueNameHelper.getStaticQueueName(), msg);
-        return receive(msg);
+        createQueues(message);
+
+        send(QueueNameHelper.getStaticQueueName(), message);
+        return receive(message);
     }
 
-    public SeqismMessage<Object> sendAndReceiveNext(SeqismMessage<Object> msg) {
-        log.debug("Sending message : [{}]", msg);
-        String tranId = msg.getHeader().getTranId();
+    public SeqismMessage<Object> sendAndReceiveNext(SeqismMessage<Object> message) {
+        log.debug("Sending message : [{}]", message);
+        String tranId = message.getHeader().getTranId();
 
-        send(QueueNameHelper.getResponseQueueName(tranId), msg);
-        return receive(msg);
+        send(QueueNameHelper.getResponseQueueName(tranId), message);
+        return receive(message);
     }
 
-    void createQueues(SeqismMessage<Object> msg) {
-        String tranId = msg.getHeader().getTranId();
+    void createQueues(SeqismMessage<Object> message) {
+        String tranId = message.getHeader().getTranId();
 
         String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
         String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
@@ -58,34 +58,35 @@ public class GateWayQueueHelper {
 
     void declareQueue(String queueName) {
         Queue queue = QueueBuilder.durable(queueName)
-                .withArgument("x-expires", QUEUE_DELETE_TIME)
+                .withArgument("x-expires", SeqismConstant.QUEUE_DELETE_TIME)
                 .build();
         rabbitAdmin.declareQueue(queue);
     }
 
-    void send(String queueName, SeqismMessage<Object> msg) {
+    void send(String queueName, SeqismMessage<Object> message) {
         try {
             if (rabbitAdmin.getQueueProperties(queueName) == null) {
-                throw new IllegalStateException("Queue does not exist ");
+                throw new SeqismException(ErrorInfo.ERROR_0001_0003);
             }
-            
-            rabbitTemplate.convertAndSend(queueName, msg);
+
+            rabbitTemplate.convertAndSend(queueName, message);
         } catch (AmqpException e) {
-            throw new IllegalStateException("Failed to send message to MQ.", e);
+            throw new SeqismException(ErrorInfo.ERROR_0001_0004, e);
         }
     }
 
-    SeqismMessage<Object> receive(SeqismMessage<Object> msg) {
-        String tranId = msg.getHeader().getTranId();
-        
+    SeqismMessage<Object> receive(SeqismMessage<Object> message) {
+        String tranId = message.getHeader().getTranId();
+
         String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
         String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
 
         try {
-            SeqismMessage<Object> receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue, RECEIVE_TIME_OUT, typeRef);
+            SeqismMessage<Object> receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue,
+                    SeqismConstant.RECEIVE_TIME_OUT, typeRef);
             log.debug("Received message : [{}]", receivedMsg);
 
-            // 성공 또는 실패 상태인 경우 큐 삭제
+            // 타임아웃 동안 응답을 받지 못하거나, 성공/실패 상태인 경우 큐 삭제
             if (receivedMsg == null || receivedMsg.getHeader().getStatus() != SeqismMessageStatus.IN_PROGRESS) {
                 rabbitAdmin.deleteQueue(commandQueue);
                 rabbitAdmin.deleteQueue(responseQueue);
@@ -94,7 +95,7 @@ public class GateWayQueueHelper {
 
             return receivedMsg;
         } catch (AmqpException e) {
-            throw new IllegalStateException("Failed to receive message from MQ.", e);
+            throw new SeqismException(ErrorInfo.ERROR_0001_0005, e);
         }
     }
 }

@@ -1,10 +1,14 @@
 package dev.seqism.gateway.service;
 
 import dev.seqism.common.vo.ErrorInfo;
+import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
+import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
 import dev.seqism.gateway.helper.GateWayQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 import java.util.function.Function;
 
 @Slf4j
@@ -17,20 +21,31 @@ public class GatewayService {
     }
 
     public SeqismMessage<Object> initSeqism(SeqismMessage<Object> message) {
-        return sendAndReceive(message, queueHelper::sendAndReceiveInit);
+        return sendAndReceive(
+                new SeqismMessage<>(
+                        SeqismMessageHeader.inProgress(message.getHeader().getBizCode(), generateTranId()),
+                        message.getBody()),
+                queueHelper::sendAndReceiveInit);
     }
 
     public SeqismMessage<Object> nextSeqism(SeqismMessage<Object> message) {
-        return sendAndReceive(message, queueHelper::sendAndReceiveNext);
+        return sendAndReceive(
+                new SeqismMessage<>(message.getHeader().toInProgress(), message.getBody()),
+                queueHelper::sendAndReceiveNext);
     }
 
-    SeqismMessage<Object> sendAndReceive(SeqismMessage<Object> message, Function<SeqismMessage<Object>, SeqismMessage<Object>> sender) {
+    String generateTranId() {
+        return UUID.randomUUID().toString();
+    }
+
+    SeqismMessage<Object> sendAndReceive(SeqismMessage<Object> message,
+            Function<SeqismMessage<Object>, SeqismMessage<Object>> sender) {
         try {
             SeqismMessage<Object> response = sender.apply(message);
-            if (response == null) {
-                throw new IllegalStateException("No response from MQ (timeout) or invalid request");
-            }
-            return response;
+            return response != null ? response : message.toFailure(ErrorInfo.ERROR_0001_0002);
+        } catch (SeqismException e) {
+            log.error("Error in GatewayService", e);
+            return message.toFailure(e.getErrorInfo());
         } catch (Exception e) {
             log.error("Error in GatewayService", e);
             return message.toFailure(ErrorInfo.ERROR_0001_0001, e.getMessage());

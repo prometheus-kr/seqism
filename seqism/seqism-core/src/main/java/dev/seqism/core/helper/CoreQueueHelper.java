@@ -1,6 +1,9 @@
 package dev.seqism.core.helper;
 
+import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.helper.QueueNameHelper;
+import dev.seqism.common.vo.ErrorInfo;
+import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,8 +13,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class CoreQueueHelper {
-
-    private static final int RECEIVE_TIME_OUT = 5000;
     private final RabbitTemplate rabbitTemplate;
 
     public CoreQueueHelper(RabbitTemplate rabbitTemplate) {
@@ -39,10 +40,10 @@ public class CoreQueueHelper {
         String responseQueueName = QueueNameHelper.getResponseQueueName(tranId);
         ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>(){};
         
-        SeqismMessage<T> receivedMsg = rabbitTemplate.receiveAndConvert(responseQueueName, RECEIVE_TIME_OUT, typeRef);
+        SeqismMessage<T> receivedMsg = rabbitTemplate.receiveAndConvert(responseQueueName, SeqismConstant.RECEIVE_TIME_OUT, typeRef);
         if (receivedMsg == null) {
             log.error("Timeout occurred while waiting for response from queue : [{}]", responseQueueName);
-            throw new RuntimeException("Timeout occurred while waiting for response from queue");
+            throw new SeqismException(ErrorInfo.ERROR_0002_0003);
         }
         
         log.debug("Received message : [{}]", receivedMsg);
