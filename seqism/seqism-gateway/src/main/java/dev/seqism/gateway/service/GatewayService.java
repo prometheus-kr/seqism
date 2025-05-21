@@ -3,7 +3,6 @@ package dev.seqism.gateway.service;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
 import dev.seqism.gateway.helper.GateWayQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,17 +20,11 @@ public class GatewayService {
     }
 
     public SeqismMessage<Object> initSeqism(SeqismMessage<Object> message) {
-        return sendAndReceive(
-                new SeqismMessage<>(
-                        SeqismMessageHeader.inProgress(message.getHeader().getBizCode(), generateTranId()),
-                        message.getBody()),
-                queueHelper::sendAndReceiveInit);
+        return sendAndReceive(message.toInProgress(generateTranId()), queueHelper::sendAndReceiveInit);
     }
 
     public SeqismMessage<Object> nextSeqism(SeqismMessage<Object> message) {
-        return sendAndReceive(
-                new SeqismMessage<>(message.getHeader().toInProgress(), message.getBody()),
-                queueHelper::sendAndReceiveNext);
+        return sendAndReceive(message.toInProgress(), queueHelper::sendAndReceiveNext);
     }
 
     String generateTranId() {

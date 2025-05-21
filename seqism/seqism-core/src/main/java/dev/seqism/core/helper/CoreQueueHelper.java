@@ -6,6 +6,8 @@ import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -30,23 +32,32 @@ public class CoreQueueHelper {
 
     private <T> void sendMessage(SeqismMessage<T> message) {
         log.debug("Sending message : [{}]", message);
-        String tranId = message.getHeader().getTranId();
+        String commandQueueName = QueueNameHelper.getCommandQueueName(message.getHeader().getTranId());
 
-        rabbitTemplate.convertAndSend(QueueNameHelper.getCommandQueueName(tranId), message);
+        try {
+            rabbitTemplate.convertAndSend(commandQueueName, message);
+        } catch (AmqpException e) {
+            throw new SeqismException(ErrorInfo.ERROR_0002_0004, e);
+        }
     }
 
     private <T> SeqismMessage<T> receivedMessage(SeqismMessage<T> message) {
-        String tranId = message.getHeader().getTranId();
-        String responseQueueName = QueueNameHelper.getResponseQueueName(tranId);
-        ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>(){};
-        
-        SeqismMessage<T> receivedMsg = rabbitTemplate.receiveAndConvert(responseQueueName, SeqismConstant.RECEIVE_TIME_OUT, typeRef);
-        if (receivedMsg == null) {
-            log.error("Timeout occurred while waiting for response from queue : [{}]", responseQueueName);
-            throw new SeqismException(ErrorInfo.ERROR_0002_0003);
+        String responseQueueName = QueueNameHelper.getResponseQueueName(message.getHeader().getTranId());
+        ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>() {
+        };
+
+        try {
+            SeqismMessage<T> receivedMsg //
+                    = rabbitTemplate.receiveAndConvert(responseQueueName, SeqismConstant.RECEIVE_TIME_OUT, typeRef);
+            if (receivedMsg == null) {
+                log.error("Timeout occurred while waiting for response from queue : [{}]", responseQueueName);
+                throw new SeqismException(ErrorInfo.ERROR_0002_0003);
+            }
+
+            log.debug("Received message : [{}]", receivedMsg);
+            return receivedMsg;
+        } catch (AmqpException e) {
+            throw new SeqismException(ErrorInfo.ERROR_0002_0005, e);
         }
-        
-        log.debug("Received message : [{}]", receivedMsg);
-        return receivedMsg;
     }
 }

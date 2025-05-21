@@ -11,13 +11,19 @@ public class SeqismMessage<T> implements Serializable {
     private final T body;
 
     public SeqismMessage() {
-        this.header = null;
-        this.body = null;
+        this(null, null);
     }
 
-    public SeqismMessage(SeqismMessageHeader header) {
-        this.header = header;
-        this.body = null;
+    public SeqismMessage<T> toSuccess() {
+        return of(header.toSuccess(), body);
+    }
+
+    public SeqismMessage<T> toInProgress() {
+        return of(header.toInProgress(), body);
+    }
+
+    public SeqismMessage<T> toInProgress(String tranId) {
+        return of(header.toInProgress(tranId), body);
     }
 
     public SeqismMessage<T> toFailure(ErrorInfo errorInfo) {
@@ -32,7 +38,7 @@ public class SeqismMessage<T> implements Serializable {
         return of(header, body);
     }
 
-    public static <T> SeqismMessage<T> of(SeqismMessageHeader header, T body) {
+    static <T> SeqismMessage<T> of(SeqismMessageHeader header, T body) {
         return new SeqismMessage<T>(header, body);
     }
 
@@ -42,37 +48,25 @@ public class SeqismMessage<T> implements Serializable {
         private final String bizCode;
         private final String tranId;
         private final SeqismMessageStatus status;
-        private final ErrorInfo error; // errorCode, errorMessage를 묶어서 사용
+        private final ErrorInfo error;
 
         public SeqismMessageHeader() {
             this(null, null, SeqismMessageStatus.FAILURE, null);
         }
 
-        public SeqismMessageHeader(String bizCode, String tranId) {
-            this(bizCode, tranId, SeqismMessageStatus.IN_PROGRESS, null);
+        SeqismMessageHeader toInProgress() {
+            return toInProgress(tranId);
         }
 
-        public SeqismMessageHeader toInProgress() {
-            return inProgress(bizCode, tranId);
-        }
-
-        public SeqismMessageHeader toSuccess() {
-            return success(bizCode, tranId);
-        }
-
-        SeqismMessageHeader toFailure(ErrorInfo errorInfo) {
-            return failure(bizCode, tranId, errorInfo);
-        }
-
-        public static SeqismMessageHeader inProgress(String bizCode, String tranId) {
+        SeqismMessageHeader toInProgress(String tranId) {
             return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.IN_PROGRESS, null);
         }
 
-        public static SeqismMessageHeader success(String bizCode, String tranId) {
+        SeqismMessageHeader toSuccess() {
             return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.SUCCESS, null);
         }
 
-        public static SeqismMessageHeader failure(String bizCode, String tranId, ErrorInfo errorInfo) {
+        SeqismMessageHeader toFailure(ErrorInfo errorInfo) {
             return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.FAILURE, errorInfo);
         }
     }

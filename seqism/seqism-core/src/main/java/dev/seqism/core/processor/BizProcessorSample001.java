@@ -27,17 +27,16 @@ public class BizProcessorSample001 extends BizProcessor<String> {
 
     @Override
     public void process(SeqismMessage<String> message) {
-        SeqismMessage.SeqismMessageHeader header = message.getHeader();
         String processed = "=====> Command_1111";
-        SeqismMessage<String> response = sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
+        SeqismMessage<String> response = sendAndReceiveOrThrow(message.withBody(processed));
 
         processed = response.getBody() + "=====> Command_2222";
-        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
+        response = sendAndReceiveOrThrow(response.withBody(processed));
 
         processed = response.getBody() + "=====> Command_3333";
-        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, processed));
+        response = sendAndReceiveOrThrow(response.withBody(processed));
 
         processed = response.getBody() + "=====> Command_4444";
-        sendFinal(new SeqismMessage<>(header.toSuccess(), processed));
+        sendFinal(response.withBody(processed).toSuccess());
     }
 }

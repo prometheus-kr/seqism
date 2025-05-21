@@ -32,19 +32,19 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
     }
 
     @Override
-    void proc(SeqismMessage<Object> seqismMessage) {
-        String bizCode = seqismMessage.getHeader().getBizCode();
+    void proc(SeqismMessage<Object> message) {
+        String bizCode = message.getHeader().getBizCode();
         BizProcessor<?> processor = processorMap.get(bizCode);
 
         if (processor != null) {
-            callProcessor(processor, seqismMessage);
+            callProcessor(processor, message);
         } else {
             log.error("No processor found for bizCode : [{}]", bizCode);
-            queueHelper.sendFinal(seqismMessage.toFailure(ErrorInfo.ERROR_0002_0001, bizCode));
+            queueHelper.sendFinal(message.toFailure(ErrorInfo.ERROR_0002_0001, bizCode));
         }
     }
 
-    <T> void callProcessor(BizProcessor<T> processor, SeqismMessage<Object> seqismMessage) {
-        processor.process(seqismMessage.withBody(mapper.convertValue(seqismMessage.getBody(), processor.getBodyType())));
+    <T> void callProcessor(BizProcessor<T> processor, SeqismMessage<Object> message) {
+        processor.process(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
     }
 }

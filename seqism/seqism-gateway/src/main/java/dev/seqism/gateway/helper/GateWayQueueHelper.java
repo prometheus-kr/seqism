@@ -82,8 +82,8 @@ public class GateWayQueueHelper {
         String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
 
         try {
-            SeqismMessage<Object> receivedMsg = rabbitTemplate.receiveAndConvert(commandQueue,
-                    SeqismConstant.RECEIVE_TIME_OUT, typeRef);
+            SeqismMessage<Object> receivedMsg //
+                    = rabbitTemplate.receiveAndConvert(commandQueue, SeqismConstant.RECEIVE_TIME_OUT, typeRef);
             log.debug("Received message : [{}]", receivedMsg);
 
             // 타임아웃 동안 응답을 받지 못하거나, 성공/실패 상태인 경우 큐 삭제

@@ -29,5 +29,7 @@ public class ErrorInfo implements Serializable {
     // BizProcessor Error
     public static ErrorInfo ERROR_0002_0001 = new ErrorInfo("00020001", "BP Error : No processor found for bizCode");
     public static ErrorInfo ERROR_0002_0002 = new ErrorInfo("00020002", "BP Error : An exception occurred while processing");
-    public static ErrorInfo ERROR_0002_0003 = new ErrorInfo("00010002", "BP Error : Timeout occurred while waiting for response from queue");
+    public static ErrorInfo ERROR_0002_0003 = new ErrorInfo("00020003", "BP Error : Timeout occurred while waiting for response from queue");
+    public static ErrorInfo ERROR_0002_0004 = new ErrorInfo("00020004", "BP Error : Failed to send message to MQ");
+    public static ErrorInfo ERROR_0002_0005 = new ErrorInfo("00020005", "BP Error : Failed to receive message from MQ");
 }

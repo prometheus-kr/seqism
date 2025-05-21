@@ -30,15 +30,13 @@ public class GatewayController {
     }
 
     @PostMapping("/init")
-    public ResponseEntity<SeqismMessage<Object>> initSeqism(@RequestBody SeqismMessage<Object> request) {
-        SeqismMessage<Object> response = gatewayService.initSeqism(request);
-        return buildResponseEntity(response);
+    public ResponseEntity<SeqismMessage<Object>> initSeqism(@RequestBody SeqismMessage<Object> message) {
+        return buildResponseEntity(gatewayService.initSeqism(message));
     }
 
     @PostMapping("/next")
-    public ResponseEntity<SeqismMessage<Object>> nextSeqism(@RequestBody SeqismMessage<Object> request) {
-        SeqismMessage<Object> response = gatewayService.nextSeqism(request);
-        return buildResponseEntity(response);
+    public ResponseEntity<SeqismMessage<Object>> nextSeqism(@RequestBody SeqismMessage<Object> message) {
+        return buildResponseEntity(gatewayService.nextSeqism(message));
     }
 
     ResponseEntity<SeqismMessage<Object>> buildResponseEntity(SeqismMessage<Object> message) {

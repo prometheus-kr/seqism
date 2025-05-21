@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
 import dev.seqism.core.helper.CoreQueueHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,30 +35,29 @@ public class BizProcessorSample003 extends BizProcessor<BizProcessorSample003.Sa
 
     @Override
     public void process(SeqismMessage<Sample003Body> message) {
-        SeqismMessageHeader header = message.getHeader();
         Sample003Body body = message.getBody();
 
         // Step 1: Add a new transaction
         body.getTransactions().add(new Transaction("TXN-001", 1000, LocalDateTime.now(), "INIT"));
-        SeqismMessage<Sample003Body> response = sendAndReceiveOrThrow(new SeqismMessage<>(header, body));
+        SeqismMessage<Sample003Body> response = sendAndReceiveOrThrow(message.withBody(body));
 
         // Step 2: Update status of last transaction
         Sample003Body respBody = response.getBody();
         Transaction lastTxn = respBody.getTransactions().get(respBody.getTransactions().size() - 1);
         lastTxn.setStatus("STEP2");
-        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, respBody));
+        response = sendAndReceiveOrThrow(response.withBody(respBody));
 
         // Step 3: Add another transaction
         respBody = response.getBody();
         respBody.getTransactions().add(new Transaction("TXN-002", 2000, LocalDateTime.now(), "STEP3"));
-        response = sendAndReceiveOrThrow(new SeqismMessage<>(header, respBody));
+        response = sendAndReceiveOrThrow(response.withBody(respBody));
 
         // Step 4: Mark all as completed
         respBody = response.getBody();
         for (Transaction txn : respBody.getTransactions()) {
             txn.setStatus("DONE");
         }
-        sendFinal(new SeqismMessage<>(header.toSuccess(), respBody));
+        sendFinal(response.withBody(respBody).toSuccess());
     }
 
     @Data
