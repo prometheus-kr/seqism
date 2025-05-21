@@ -13,14 +13,14 @@ public abstract class BizProcessor<T> {
         this.mapper = mapper;
     }
     
-    protected SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> msg) {
-        SeqismMessage<T> response = queueHelper.sendAndReceiveOrThrow(msg);
+    protected SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> message) {
+        SeqismMessage<T> response = queueHelper.sendAndReceiveOrThrow(message);
         T respBody = mapper.convertValue(response.getBody(), getBodyType());
-        return new SeqismMessage<>(msg.getHeader(), respBody);
+        return response.withBody(respBody);
     }
 
-    protected void sendFinal(SeqismMessage<T> msg) {
-        queueHelper.sendFinal(msg);
+    protected void sendFinal(SeqismMessage<T> message) {
+        queueHelper.sendFinal(message);
     }
 
     public abstract String getBizCode();

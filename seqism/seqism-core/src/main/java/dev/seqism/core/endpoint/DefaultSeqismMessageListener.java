@@ -1,5 +1,6 @@
 package dev.seqism.core.endpoint;
 
+import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.core.helper.CoreQueueHelper;
 import dev.seqism.core.processor.BizProcessor;
@@ -39,11 +40,11 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
             callProcessor(processor, seqismMessage);
         } else {
             log.error("No processor found for bizCode : [{}]", bizCode);
-            queueHelper.sendFinal(new SeqismMessage<>(seqismMessage.getHeader().toFailure(), "Error : No processor found for bizCode[" + bizCode + "]"));
+            queueHelper.sendFinal(seqismMessage.toFailure(ErrorInfo.ERROR_0002_0001, bizCode));
         }
     }
 
     <T> void callProcessor(BizProcessor<T> processor, SeqismMessage<Object> seqismMessage) {
-        processor.process(new SeqismMessage<>(seqismMessage.getHeader(), mapper.convertValue(seqismMessage.getBody(), processor.getBodyType())));
+        processor.process(seqismMessage.withBody(mapper.convertValue(seqismMessage.getBody(), processor.getBodyType())));
     }
 }

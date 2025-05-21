@@ -18,24 +18,24 @@ public class CoreQueueHelper {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public <T> SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> msg) {
-        sendMessage(msg);
-        return receivedMessage(msg);
+    public <T> SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> message) {
+        sendMessage(message);
+        return receivedMessage(message);
     }
 
-    public <T> void sendFinal(SeqismMessage<T> msg) {
-        sendMessage(msg);
+    public <T> void sendFinal(SeqismMessage<T> message) {
+        sendMessage(message);
     }
 
-    private <T> void sendMessage(SeqismMessage<T> msg) {
-        log.debug("Sending message : [{}]", msg);
-        String tranId = msg.getHeader().getTranId();
+    private <T> void sendMessage(SeqismMessage<T> message) {
+        log.debug("Sending message : [{}]", message);
+        String tranId = message.getHeader().getTranId();
 
-        rabbitTemplate.convertAndSend(QueueNameHelper.getCommandQueueName(tranId), msg);
+        rabbitTemplate.convertAndSend(QueueNameHelper.getCommandQueueName(tranId), message);
     }
 
-    private <T> SeqismMessage<T> receivedMessage(SeqismMessage<T> msg) {
-        String tranId = msg.getHeader().getTranId();
+    private <T> SeqismMessage<T> receivedMessage(SeqismMessage<T> message) {
+        String tranId = message.getHeader().getTranId();
         String responseQueueName = QueueNameHelper.getResponseQueueName(tranId);
         ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>(){};
         

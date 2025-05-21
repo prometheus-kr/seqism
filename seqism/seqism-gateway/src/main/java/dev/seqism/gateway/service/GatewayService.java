@@ -1,5 +1,6 @@
 package dev.seqism.gateway.service;
 
+import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.gateway.helper.GateWayQueueHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +17,14 @@ public class GatewayService {
     }
 
     public SeqismMessage<Object> initSeqism(SeqismMessage<Object> message) {
-        return handleSeqism(message, queueHelper::sendAndReceiveInit);
+        return sendAndReceive(message, queueHelper::sendAndReceiveInit);
     }
 
     public SeqismMessage<Object> nextSeqism(SeqismMessage<Object> message) {
-        return handleSeqism(message, queueHelper::sendAndReceiveNext);
+        return sendAndReceive(message, queueHelper::sendAndReceiveNext);
     }
 
-    SeqismMessage<Object> handleSeqism(SeqismMessage<Object> message, Function<SeqismMessage<Object>, SeqismMessage<Object>> sender) {
+    SeqismMessage<Object> sendAndReceive(SeqismMessage<Object> message, Function<SeqismMessage<Object>, SeqismMessage<Object>> sender) {
         try {
             SeqismMessage<Object> response = sender.apply(message);
             if (response == null) {
@@ -32,7 +33,7 @@ public class GatewayService {
             return response;
         } catch (Exception e) {
             log.error("Error in GatewayService", e);
-            return new SeqismMessage<>(message.getHeader().toFailure(), "Error : " + e.getMessage());
+            return message.toFailure(ErrorInfo.ERROR_0001_0001, e.getMessage());
         }
     }
 }
