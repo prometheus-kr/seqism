@@ -63,6 +63,7 @@ public class GateWayQueueHelper {
         rabbitAdmin.declareQueue(queue);
     }
 
+    @SuppressWarnings("unused")
     void send(String queueName, SeqismMessage<Object> message) {
         try {
             if (rabbitAdmin.getQueueProperties(queueName) == null) {

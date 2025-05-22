@@ -1,7 +1,6 @@
 package dev.seqism.gateway.endpoint;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageHeader;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
 import dev.seqism.gateway.service.GatewayService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 /**
  * GatewayController
