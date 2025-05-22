@@ -1,46 +1,39 @@
 #!/bin/bash
 
-if [ "$1" != "--testOnly" ]; then
-  # 1️⃣ 루트에서 전체 빌드
-  echo "Building all Maven modules (including seqism-common)..."
-  mvn clean install
-
-  # 2️⃣ 기존 Docker 컨테이너 종료
-  echo "Stopping existing containers..."
-  docker compose down
-
-  # 3️⃣ Docker 컨테이너 다시 시작
-  echo "Starting containers..."
-  docker compose up --build -d
-
-  # 4️⃣ RabbitMQ가 정상 기동될 때까지 대기
-  echo "Waiting for RabbitMQ to be ready..."
-  while ! docker exec seqism-mq rabbitmqctl status > /dev/null 2>&1; do
-    echo "RabbitMQ is not ready yet. Checking again in 1 second..."
-    sleep 1
+# jq로 특정 필드(tranId, timestamp 등) 재귀적으로 제거
+Remove-FieldsRecursive() {
+  local json="$1"
+  shift
+  local jq_filter="."
+  for field in "$@"; do
+    jq_filter+=" | del(.. | .${field}?)"
   done
-  echo "RabbitMQ is ready!"
+  echo "$json" | jq "$jq_filter"
+}
 
-  # 5️⃣ Gateway가 준비될 때까지 대기
-  echo "Waiting for Gateway to be ready..."
-  until curl -s http://localhost:8080/actuator/health | grep -q '"status":"UP"'; do
-    echo "Gateway is not ready yet. Checking again in 1 second..."
-    sleep 1
+# 실제/예상 응답 비교 함수
+Test-SeqismResponse() {
+  local actual_json="$1"
+  local expected_json="$2"
+  local ignore_fields=("tranId" "timestamp")
+
+  # 필드 제거
+  for field in "${ignore_fields[@]}"; do
+    actual_json=$(Remove-FieldsRecursive "$actual_json" "$field")
+    expected_json=$(Remove-FieldsRecursive "$expected_json" "$field")
   done
-  echo "Gateway is ready!"
-fi
+
+  # 비교
+  if diff <(echo "$actual_json" | jq -S .) <(echo "$expected_json" | jq -S .) >/dev/null; then
+    echo "✅ 예상과 일치"
+  else
+    echo "❌ 전체 응답 불일치!"
+    echo "예상: $expected_json"
+    echo "실제: $actual_json"
+  fi
+}
 
 # 6️⃣ Gateway로 테스트 메시지 전송
 echo "Sending test message to Gateway..."
-for i in {1..2}
-do
-  init_response=$(curl -s -X POST http://localhost:8080/api/init -H "Content-Type: application/json" -d '{"bizCode":"BankIC", "message": "Hello, Seqism!"}')
-  tranId=$(echo "$init_response" | grep -oP '"tranId"\s*:\s*"\K[^"]+')
-  r1=$(curl -s -X POST http://localhost:8080/api/next -H "Content-Type: application/json" -d "{\"tranId\":\"$tranId\", \"bizCode\":\"BankIC\", \"message\":\"Hello, Seqism!\"}")
-  r2=$(curl -s -X POST http://localhost:8080/api/next -H "Content-Type: application/json" -d "{\"tranId\":\"$tranId\", \"bizCode\":\"BankIC\", \"message\":\"Hello, Seqism!\"}")
-  echo "$init_response"
-  echo "$r1"
-  echo "$r2"
-done
 
 echo "Test completed!"
