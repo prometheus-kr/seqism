@@ -1,4 +1,4 @@
-package dev.seqism.core;
+package dev.seqism.processor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

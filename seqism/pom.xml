@@ -12,7 +12,7 @@
 
     <modules>
         <module>seqism-common</module>
-        <module>seqism-core</module>
+        <module>seqism-processor</module>
         <module>seqism-gateway</module>
     </modules>
 

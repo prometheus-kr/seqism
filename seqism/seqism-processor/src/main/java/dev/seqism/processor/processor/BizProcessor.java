@@ -1,8 +1,8 @@
-package dev.seqism.core.processor;
+package dev.seqism.processor.processor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.core.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.CoreQueueHelper;
 
 public abstract class BizProcessor<T> {
     protected final CoreQueueHelper queueHelper;

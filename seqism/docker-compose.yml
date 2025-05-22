@@ -13,9 +13,9 @@ services:
       - SPRING_RABBITMQ_USERNAME=guest
       - SPRING_RABBITMQ_PASSWORD=guest
 
-  seqism-core:
-    build: ./seqism-core
-    container_name: seqism-core
+  seqism-processor:
+    build: ./seqism-processor
+    container_name: seqism-processor
     depends_on:
       seqism-mq:
         condition: service_healthy

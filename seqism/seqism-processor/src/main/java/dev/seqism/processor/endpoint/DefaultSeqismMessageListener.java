@@ -1,9 +1,9 @@
-package dev.seqism.core.endpoint;
+package dev.seqism.processor.endpoint;
 
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.core.helper.CoreQueueHelper;
-import dev.seqism.core.processor.BizProcessor;
+import dev.seqism.processor.helper.CoreQueueHelper;
+import dev.seqism.processor.processor.BizProcessor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;

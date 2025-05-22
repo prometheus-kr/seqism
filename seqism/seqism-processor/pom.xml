@@ -12,11 +12,11 @@
     </parent>
     
     <groupId>dev.seqism</groupId>
-    <artifactId>seqism-core</artifactId>
+    <artifactId>seqism-processor</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Seqism Core</name>
+    <name>Seqism Processor</name>
     <description>xxxxxxxxxx</description>
 
     <properties>

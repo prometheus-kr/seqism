@@ -1,4 +1,4 @@
-package dev.seqism.core.helper;
+package dev.seqism.processor.helper;
 
 import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.helper.QueueNameHelper;

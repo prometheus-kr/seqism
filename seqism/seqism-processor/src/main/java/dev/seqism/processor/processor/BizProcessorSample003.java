@@ -1,10 +1,10 @@
-package dev.seqism.core.processor;
+package dev.seqism.processor.processor;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.core.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.CoreQueueHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

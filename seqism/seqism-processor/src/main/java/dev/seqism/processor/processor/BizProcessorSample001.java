@@ -1,7 +1,7 @@
-package dev.seqism.core.processor;
+package dev.seqism.processor.processor;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.core.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.CoreQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

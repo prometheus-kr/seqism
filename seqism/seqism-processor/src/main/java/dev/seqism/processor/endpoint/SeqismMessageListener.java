@@ -1,10 +1,10 @@
-package dev.seqism.core.endpoint;
+package dev.seqism.processor.endpoint;
 
 import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.core.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.CoreQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
