@@ -1,4 +1,4 @@
-package dev.seqism.gateway.endpoint;
+package dev.seqism.ex.gateway.endpoint;
 
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;

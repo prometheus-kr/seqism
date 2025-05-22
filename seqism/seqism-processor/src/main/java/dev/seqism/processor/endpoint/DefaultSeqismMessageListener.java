@@ -3,7 +3,7 @@ package dev.seqism.processor.endpoint;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.processor.helper.CoreQueueHelper;
-import dev.seqism.processor.processor.BizProcessor;
+import dev.seqism.processor.BizProcessor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
     private final ObjectMapper mapper;
     private final Map<String, BizProcessor<?>> processorMap;
 
-    DefaultSeqismMessageListener(CoreQueueHelper queueHelper, ObjectMapper mapper, List<BizProcessor<?>> processors) {
+    DefaultSeqismMessageListener(ObjectMapper mapper, CoreQueueHelper queueHelper, List<BizProcessor<?>> processors) {
         super(queueHelper);
         this.mapper = mapper;
         this.processorMap = processors.stream().collect(Collectors.toMap(BizProcessor::getBizCode, p -> p));

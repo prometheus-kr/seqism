@@ -59,7 +59,7 @@ function Test-SeqismResponse {
     }
 }
 
-# 6️⃣ Gateway로 테스트 메시지 전송
+# 1️⃣ Gateway로 테스트 메시지 전송
 Write-Host "Sending test message to Gateway..."
 
 for ($i = 1; $i -le 2; $i++) { 

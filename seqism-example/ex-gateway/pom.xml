@@ -12,11 +12,11 @@
     </parent>
     
     <groupId>dev.seqism</groupId>
-    <artifactId>seqism-processor</artifactId>
+    <artifactId>ex-gateway</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Seqism Processor</name>
+    <name>Example Gateway</name>
     <description>xxxxxxxxxx</description>
 
     <properties>
@@ -27,8 +27,26 @@
     <dependencies>
         <dependency>
             <groupId>dev.seqism</groupId>
-            <artifactId>seqism-common</artifactId>
+            <artifactId>seqism-gateway</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        
+        <!-- Spring Boot 기본 의존성 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Web: REST API 지원 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Actuator (모니터링) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <!-- Lombok (코드 간결화) -->
@@ -37,16 +55,15 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- RabbitMQ (메시지 큐 활용 시) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-json</artifactId>
-        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven 플러그인 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

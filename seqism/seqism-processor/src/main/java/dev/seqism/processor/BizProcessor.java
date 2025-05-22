@@ -1,16 +1,16 @@
-package dev.seqism.processor.processor;
+package dev.seqism.processor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.processor.helper.CoreQueueHelper;
 
 public abstract class BizProcessor<T> {
-    protected final CoreQueueHelper queueHelper;
     protected final ObjectMapper mapper;
+    protected final CoreQueueHelper queueHelper;
 
-    public BizProcessor(CoreQueueHelper queueHelper, ObjectMapper mapper) {
-        this.queueHelper = queueHelper;
+    public BizProcessor(ObjectMapper mapper, CoreQueueHelper queueHelper) {
         this.mapper = mapper;
+        this.queueHelper = queueHelper;
     }
     
     protected SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> message) {

@@ -1,7 +1,8 @@
-package dev.seqism.processor.processor;
+package dev.seqism.ex.processor.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.seqism.common.vo.SeqismMessage;
+import dev.seqism.processor.BizProcessor;
 import dev.seqism.processor.helper.CoreQueueHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,8 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BizProcessorSample002 extends BizProcessor<BizProcessorSample002.Sample002Body> {
 
-    public BizProcessorSample002(CoreQueueHelper queueHelper, ObjectMapper mapper) {
-        super(queueHelper, mapper);
+    public BizProcessorSample002(ObjectMapper mapper, CoreQueueHelper queueHelper) {
+        super(mapper, queueHelper);
     }
 
     @Override

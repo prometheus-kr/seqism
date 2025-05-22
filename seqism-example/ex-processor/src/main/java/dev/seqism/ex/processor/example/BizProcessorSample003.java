@@ -1,9 +1,10 @@
-package dev.seqism.processor.processor;
+package dev.seqism.ex.processor.example;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.seqism.common.vo.SeqismMessage;
+import dev.seqism.processor.BizProcessor;
 import dev.seqism.processor.helper.CoreQueueHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +20,8 @@ import java.util.List;
 @Component
 public class BizProcessorSample003 extends BizProcessor<BizProcessorSample003.Sample003Body> {
 
-    public BizProcessorSample003(CoreQueueHelper queueHelper, ObjectMapper mapper) {
-        super(queueHelper, mapper);
+    public BizProcessorSample003(ObjectMapper mapper, CoreQueueHelper queueHelper) {
+        super(mapper, queueHelper);
     }
 
     @Override

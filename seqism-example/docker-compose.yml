@@ -1,7 +1,7 @@
 services:
-  seqism-gateway:
-    build: ./seqism-gateway
-    container_name: seqism-gateway
+  ex-gateway:
+    build: ./ex-gateway
+    container_name: ex-gateway
     ports:
       - "8080:8080"
     depends_on:
@@ -13,9 +13,9 @@ services:
       - SPRING_RABBITMQ_USERNAME=guest
       - SPRING_RABBITMQ_PASSWORD=guest
 
-  seqism-processor:
-    build: ./seqism-processor
-    container_name: seqism-processor
+  ex-processor:
+    build: ./ex-processor
+    container_name: ex-processor
     depends_on:
       seqism-mq:
         condition: service_healthy
