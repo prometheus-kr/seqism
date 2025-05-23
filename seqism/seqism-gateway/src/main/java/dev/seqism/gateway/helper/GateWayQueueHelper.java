@@ -5,7 +5,7 @@ import dev.seqism.common.helper.QueueNameHelper;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
+import dev.seqism.common.vo.SeqismMessageStatus;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.amqp.AmqpException;
@@ -21,14 +21,13 @@ import org.springframework.stereotype.Component;
 public class GateWayQueueHelper {
     private final RabbitAdmin rabbitAdmin;
     private final RabbitTemplate rabbitTemplate;
-    private final ParameterizedTypeReference<SeqismMessage<Object>> typeRef = new ParameterizedTypeReference<SeqismMessage<Object>>() {};
 
     public GateWayQueueHelper(RabbitAdmin rabbitAdmin, RabbitTemplate rabbitTemplate) {
         this.rabbitAdmin = rabbitAdmin;
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public SeqismMessage<Object> sendAndReceiveInit(SeqismMessage<Object> message) {
+    public <T> SeqismMessage<T> sendAndReceiveInit(SeqismMessage<T> message) {
         log.debug("Sending message : [{}]", message);
 
         createQueues(message);
@@ -37,7 +36,7 @@ public class GateWayQueueHelper {
         return receive(message);
     }
 
-    public SeqismMessage<Object> sendAndReceiveNext(SeqismMessage<Object> message) {
+    public <T> SeqismMessage<T> sendAndReceiveNext(SeqismMessage<T> message) {
         log.debug("Sending message : [{}]", message);
         String tranId = message.getHeader().getTranId();
 
@@ -45,7 +44,7 @@ public class GateWayQueueHelper {
         return receive(message);
     }
 
-    void createQueues(SeqismMessage<Object> message) {
+    void createQueues(SeqismMessage<?> message) {
         String tranId = message.getHeader().getTranId();
 
         String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
@@ -64,7 +63,7 @@ public class GateWayQueueHelper {
     }
 
     @SuppressWarnings("unused")
-    void send(String queueName, SeqismMessage<Object> message) {
+    <T> void send(String queueName, SeqismMessage<T> message) {
         try {
             if (rabbitAdmin.getQueueProperties(queueName) == null) {
                 throw new SeqismException(ErrorInfo.ERROR_0001_0003);
@@ -76,14 +75,16 @@ public class GateWayQueueHelper {
         }
     }
 
-    SeqismMessage<Object> receive(SeqismMessage<Object> message) {
+    <T> SeqismMessage<T> receive(SeqismMessage<T> message) {
         String tranId = message.getHeader().getTranId();
 
         String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
         String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
 
+        ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>() {};
+
         try {
-            SeqismMessage<Object> receivedMsg //
+            SeqismMessage<T> receivedMsg //
                     = rabbitTemplate.receiveAndConvert(commandQueue, SeqismConstant.RECEIVE_TIME_OUT, typeRef);
             log.debug("Received message : [{}]", receivedMsg);
 

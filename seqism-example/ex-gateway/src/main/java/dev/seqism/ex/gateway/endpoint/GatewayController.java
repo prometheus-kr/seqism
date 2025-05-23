@@ -1,7 +1,7 @@
 package dev.seqism.ex.gateway.endpoint;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.common.vo.SeqismMessage.SeqismMessageStatus;
+import dev.seqism.common.vo.SeqismMessageStatus;
 import dev.seqism.gateway.service.GatewayService;
 import lombok.extern.slf4j.Slf4j;
 

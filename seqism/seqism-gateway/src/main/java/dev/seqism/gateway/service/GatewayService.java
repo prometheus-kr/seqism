@@ -19,11 +19,11 @@ public class GatewayService {
         this.queueHelper = queueHelper;
     }
 
-    public SeqismMessage<Object> initSeqism(SeqismMessage<Object> message) {
+    public <T> SeqismMessage<T> initSeqism(SeqismMessage<T> message) {
         return sendAndReceive(message.toInProgress(generateTranId()), queueHelper::sendAndReceiveInit);
     }
 
-    public SeqismMessage<Object> nextSeqism(SeqismMessage<Object> message) {
+    public <T> SeqismMessage<T> nextSeqism(SeqismMessage<T> message) {
         return sendAndReceive(message.toInProgress(), queueHelper::sendAndReceiveNext);
     }
 
@@ -31,10 +31,10 @@ public class GatewayService {
         return UUID.randomUUID().toString();
     }
 
-    SeqismMessage<Object> sendAndReceive(SeqismMessage<Object> message,
-            Function<SeqismMessage<Object>, SeqismMessage<Object>> sender) {
+    <T> SeqismMessage<T> sendAndReceive(SeqismMessage<T> message,
+            Function<SeqismMessage<T>, SeqismMessage<T>> sender) {
         try {
-            SeqismMessage<Object> response = sender.apply(message);
+            SeqismMessage<T> response = sender.apply(message);
             return response != null ? response : message.toFailure(ErrorInfo.ERROR_0001_0002);
         } catch (SeqismException e) {
             log.error("Error in GatewayService", e);
