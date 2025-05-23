@@ -1,0 +1,40 @@
+services:
+  ex-gateway:
+    build: ./ex-gateway
+    container_name: ex-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      seqism-mq:
+        condition: service_healthy
+    environment:
+      - SPRING_RABBITMQ_HOST=seqism-mq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+
+  ex-processor:
+    build: ./ex-processor
+    container_name: ex-processor
+    depends_on:
+      seqism-mq:
+        condition: service_healthy
+    environment:
+      - SPRING_RABBITMQ_HOST=seqism-mq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+
+  seqism-mq:
+    image: "rabbitmq:3-management"
+    container_name: seqism-mq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+
