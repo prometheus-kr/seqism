@@ -6,7 +6,7 @@
 
     <groupId>dev.seqism</groupId>
     <artifactId>seqism-processor-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
     <name>seqism-processor-spring-boot-starter</name>
     <description>Spring Boot Starter for Seqism Processor</description>
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>dev.seqism</groupId>
             <artifactId>seqism-processor</artifactId>
-            <version>1.0.0</version>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
 </project>

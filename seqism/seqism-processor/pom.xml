@@ -13,7 +13,7 @@
     
     <groupId>dev.seqism</groupId>
     <artifactId>seqism-processor</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
 
     <name>Seqism Processor</name>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>dev.seqism</groupId>
             <artifactId>seqism-common</artifactId>
-            <version>1.0.0</version>
+            <version>0.0.1</version>
         </dependency>
 
         <!-- Lombok (코드 간결화) -->

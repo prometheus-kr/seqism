@@ -13,7 +13,7 @@
     
     <groupId>dev.seqism</groupId>
     <artifactId>ex-gateway</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
 
     <name>Example Gateway</name>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>dev.seqism</groupId>
             <artifactId>seqism-gateway-spring-boot-starter</artifactId>
-            <version>1.0.0</version>
+            <version>0.0.1</version>
         </dependency>
         
         <!-- Spring Boot 기본 의존성 -->
