@@ -2,4 +2,6 @@
 SEQuential Interactive Server Method
 
 ### pronunciation
-/ˈsɪkwɪzəm/ 시퀴즘
+sequential(/sɪˈkwenʃl/) + ism
+
+=> 시퀴즘 /sɪˈkwɪzəm/ or 시키즘 /sɪkˈɪzəm/
