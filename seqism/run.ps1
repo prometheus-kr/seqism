@@ -13,3 +13,11 @@ Set-Location ..
 Set-Location seqism-processor
 mvn clean install
 Set-Location ..
+
+Set-Location seqism-gateway-starter
+mvn clean install
+Set-Location ..
+
+Set-Location seqism-processor-starter
+mvn clean install
+Set-Location ..

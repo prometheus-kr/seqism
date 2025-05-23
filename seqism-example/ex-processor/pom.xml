@@ -27,7 +27,7 @@
     <dependencies>
         <dependency>
             <groupId>dev.seqism</groupId>
-            <artifactId>seqism-processor</artifactId>
+            <artifactId>seqism-processor-spring-boot-starter</artifactId>
             <version>1.0.0</version>
         </dependency>
         

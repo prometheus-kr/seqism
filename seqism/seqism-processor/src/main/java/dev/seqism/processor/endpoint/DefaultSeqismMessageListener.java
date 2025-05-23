@@ -3,7 +3,7 @@ package dev.seqism.processor.endpoint;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.processor.helper.CoreQueueHelper;
-import dev.seqism.processor.BizProcessor;
+import dev.seqism.processor.SeqismProcessor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
@@ -23,18 +23,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> {
     private final ObjectMapper mapper;
-    private final Map<String, BizProcessor<?>> processorMap;
+    private final Map<String, SeqismProcessor<?>> processorMap;
 
-    DefaultSeqismMessageListener(ObjectMapper mapper, CoreQueueHelper queueHelper, List<BizProcessor<?>> processors) {
+    DefaultSeqismMessageListener(ObjectMapper mapper, CoreQueueHelper queueHelper, List<SeqismProcessor<?>> processors) {
         super(queueHelper);
         this.mapper = mapper;
-        this.processorMap = processors.stream().collect(Collectors.toMap(BizProcessor::getBizCode, p -> p));
+        this.processorMap = processors.stream().collect(Collectors.toMap(SeqismProcessor::getBizCode, p -> p));
     }
 
     @Override
     void proc(SeqismMessage<Object> message) {
         String bizCode = message.getHeader().getBizCode();
-        BizProcessor<?> processor = processorMap.get(bizCode);
+        SeqismProcessor<?> processor = processorMap.get(bizCode);
 
         if (processor != null) {
             callProcessor(processor, message);
@@ -44,7 +44,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
         }
     }
 
-    <T> void callProcessor(BizProcessor<T> processor, SeqismMessage<Object> message) {
+    <T> void callProcessor(SeqismProcessor<T> processor, SeqismMessage<Object> message) {
         processor.process(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
     }
 }

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.processor.helper.CoreQueueHelper;
 
-public abstract class BizProcessor<T> {
+public abstract class SeqismProcessor<T> {
     protected final ObjectMapper mapper;
     protected final CoreQueueHelper queueHelper;
 
-    public BizProcessor(ObjectMapper mapper, CoreQueueHelper queueHelper) {
+    public SeqismProcessor(ObjectMapper mapper, CoreQueueHelper queueHelper) {
         this.mapper = mapper;
         this.queueHelper = queueHelper;
     }

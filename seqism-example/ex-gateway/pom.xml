@@ -27,7 +27,7 @@
     <dependencies>
         <dependency>
             <groupId>dev.seqism</groupId>
-            <artifactId>seqism-gateway</artifactId>
+            <artifactId>seqism-gateway-spring-boot-starter</artifactId>
             <version>1.0.0</version>
         </dependency>
         
