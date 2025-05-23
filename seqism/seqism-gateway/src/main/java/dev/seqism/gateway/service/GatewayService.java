@@ -31,8 +31,7 @@ public class GatewayService {
         return UUID.randomUUID().toString();
     }
 
-    <T> SeqismMessage<T> sendAndReceive(SeqismMessage<T> message,
-            Function<SeqismMessage<T>, SeqismMessage<T>> sender) {
+    <T> SeqismMessage<T> sendAndReceive(SeqismMessage<T> message, Function<SeqismMessage<T>, SeqismMessage<T>> sender) {
         try {
             SeqismMessage<T> response = sender.apply(message);
             return response != null ? response : message.toFailure(ErrorInfo.ERROR_0001_0002);

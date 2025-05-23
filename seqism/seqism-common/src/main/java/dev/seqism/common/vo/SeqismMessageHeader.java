@@ -22,14 +22,22 @@ public class SeqismMessageHeader implements Serializable {
     }
 
     SeqismMessageHeader toInProgress(String tranId) {
-        return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.IN_PROGRESS, null);
+        return of(bizCode, tranId, SeqismMessageStatus.IN_PROGRESS);
     }
 
     SeqismMessageHeader toSuccess() {
-        return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.SUCCESS, null);
+        return of(bizCode, tranId, SeqismMessageStatus.SUCCESS);
     }
 
     SeqismMessageHeader toFailure(ErrorInfo errorInfo) {
-        return new SeqismMessageHeader(bizCode, tranId, SeqismMessageStatus.FAILURE, errorInfo);
+        return of(bizCode, tranId, SeqismMessageStatus.FAILURE, errorInfo);
+    }
+
+    static SeqismMessageHeader of(String bizCode, String tranId, SeqismMessageStatus status) {
+        return of(bizCode, tranId, status, null);
+    }
+
+    static SeqismMessageHeader of(String bizCode, String tranId, SeqismMessageStatus status, ErrorInfo errorInfo) {
+        return new SeqismMessageHeader(bizCode, tranId, status, errorInfo);
     }
 }
