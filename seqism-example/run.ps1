@@ -1,12 +1,35 @@
+# Function Declaration Section =================================================
+function Convert-PathForDocker($path) {
+    # C:\ABC\XYZ -> /c/ABC/XYZ
+    $strPath = [string]$path -replace '\\', '/'
+    if ($strPath -match '^([A-Za-z]):') {
+        $drive = $matches[1].ToLower()
+        $dockerPath = $strPath -replace '^([A-Za-z]):', "/$drive"
+    } else {
+        $dockerPath = $strPath
+    }
+    return $dockerPath
+}
 
-# 1️⃣ 루트에서 전체 빌드
-Write-Host "Building all Maven modules ..."
-Set-Location ex-gateway
-mvn clean install
-Set-Location ..
-Set-Location ex-processor
-mvn clean install
-Set-Location ..
+function Build-Module($moduleName) {
+    if (-not (Test-Path $moduleName)) {
+        throw "Directory not found: $moduleName"
+    }
+    $absPath = "$((Resolve-Path $moduleName).Path)"
+    $dockerPath = Convert-PathForDocker $absPath
+    $m2Path = "$env:USERPROFILE/.m2"
+    docker run --rm -v ${m2Path}:/root/.m2 -v ${dockerPath}:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean install
+    if ($LASTEXITCODE -ne 0) {
+        throw "Build failed in $moduleName"
+    }
+}
+# ==============================================================================
+
+
+# 1️⃣ 전체 빌드
+Write-Host "Building all Maven modules using Docker..."
+Build-Module "ex-gateway"
+Build-Module "ex-processor"
 
 # 2️⃣ 기존 Docker 컨테이너 종료
 Write-Host "Stopping existing containers..."

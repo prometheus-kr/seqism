@@ -41,10 +41,42 @@ build_module() {
 }
 # ==============================================================================
 
+# 1️⃣ 전체 빌드
 echo "Building all Maven modules using Docker..."
+build_module "ex-gateway"
+build_module "ex-processor"
 
-build_module "seqism-common"
-build_module "seqism-gateway"
-build_module "seqism-processor"
-build_module "seqism-gateway-starter"
-build_module "seqism-processor-starter"
+# 2️⃣ 기존 Docker 컨테이너 종료
+echo "Stopping existing containers..."
+docker compose down
+
+# 3️⃣ Docker 컨테이너 다시 시작
+echo "Starting containers..."
+docker compose up --build -d
+
+# 4️⃣ RabbitMQ가 정상 기동될 때까지 대기
+echo "Waiting for RabbitMQ to be ready..."
+while true; do
+    sleep 1
+    status=$(docker exec seqism-mq rabbitmqctl status 2>&1)
+    if [[ "$status" == *"Status of node"* ]]; then
+        echo "RabbitMQ is ready!"
+        break
+    else
+        echo "RabbitMQ is not ready yet. Checking again in 1 second..."
+    fi
+done
+
+# 5️⃣ Gateway가 준비될 때까지 대기
+echo "Waiting for Gateway to be ready..."
+while true; do
+    sleep 1
+    response=$(curl -s --max-time 2 http://localhost:8080/actuator/health)
+    if [[ "$response" == *'"status":"UP"'* ]]; then
+        echo "Gateway is ready!"
+        break
+    fi
+done
+
+# 6️⃣ test.ps1 실행
+./test.sh
