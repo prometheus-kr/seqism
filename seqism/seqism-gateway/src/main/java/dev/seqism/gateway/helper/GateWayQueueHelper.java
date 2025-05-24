@@ -108,7 +108,6 @@ public class GateWayQueueHelper {
      * <p>
      * This method logs the outgoing message, sends it to the appropriate response queue,
      * and then calls {@link #receive(SeqismMessage)} to wait for and return the next message.
-     * </p>
      *
      * @param <T>
      *            the type of the payload contained in the {@link SeqismMessage}
@@ -164,7 +163,6 @@ public class GateWayQueueHelper {
      * Checks if the queue exists before sending the message. If the queue does not exist,
      * throws a {@link SeqismException} with {@link ErrorInfo#ERROR_0001_0003}. If an AMQP-related
      * error occurs during sending, throws a {@link SeqismException} with {@link ErrorInfo#ERROR_0001_0004}.
-     * </p>
      *
      * @param queueName
      *            the name of the target queue

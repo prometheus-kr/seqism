@@ -49,7 +49,6 @@ public class SeqismMessageHeader implements Serializable {
      * <p>
      * Initializes a new instance of {@code SeqismMessageHeader} with default values:
      * {@code null} for unspecified fields and {@code SeqismMessageStatus.FAILURE} as the default status.
-     * </p>
      */
     public SeqismMessageHeader() {
         this(null, null, SeqismMessageStatus.FAILURE, null);

@@ -23,7 +23,7 @@ import dev.seqism.common.constant.SeqismConstant;
  * </ul>
  * <p>
  * The class is annotated with {@code @Configuration} to indicate that it provides Spring beans,
- * and {@code @EnableRabbit} to enable support for RabbitMQ annotations.
+ * and {@code @EnableRabbit} to enable support for RabbitMQ messaging.
  */
 @Configuration
 @EnableRabbit
