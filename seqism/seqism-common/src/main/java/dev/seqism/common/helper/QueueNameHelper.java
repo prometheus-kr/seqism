@@ -6,7 +6,6 @@ import dev.seqism.common.constant.SeqismConstant;
  * Helper class for generating standardized queue names used within the application.
  * Provides methods to retrieve static, command, and response queue names based on transaction IDs.
  *
- * @author Prometheus-kr
  * @since 0.0.1
  */
 public class QueueNameHelper {

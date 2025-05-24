@@ -14,7 +14,6 @@ package dev.seqism.common.vo;
  *
  * @see ErrorInfo
  *
- * @author Prometheus-kr
  * @since 0.0.1
  */
 public class SeqismException extends RuntimeException {

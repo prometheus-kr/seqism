@@ -8,7 +8,6 @@ package dev.seqism.common.vo;
  * <li>{@link #FAILURE} - The message processing has failed.</li>
  * </ul>
  *
- * @author Prometheus-kr
  * @since 0.0.1
  */
 public enum SeqismMessageStatus {

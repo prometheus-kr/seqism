@@ -35,7 +35,6 @@ import lombok.Data;
  * <p>
  * This class is immutable and serializable.
  *
- * @author Prometheus-kr
  * @since 0.0.1
  */
 @Data

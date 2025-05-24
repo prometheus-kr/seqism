@@ -33,7 +33,6 @@ import lombok.Data;
  * @see SeqismMessageHeader
  * @see ErrorInfo
  *
- * @author Prometheus-kr
  * @since 0.0.1
  */
 @Data

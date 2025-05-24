@@ -20,7 +20,6 @@ import lombok.Data;
  * SeqismMessageHeader successHeader = header.toSuccess();
  * </pre>
  *
- * @author Prometheus-kr
  * @since 0.0.1
  */
 @Data

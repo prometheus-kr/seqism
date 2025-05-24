@@ -15,7 +15,6 @@ package dev.seqism.common.constant;
  * <li>{@link #RESPONSE_QUEUE_PREFIX} - Prefix for response queue names.</li>
  * </ul>
  *
- * @author Prometheus-kr
  * @since 0.0.1
  */
 public class SeqismConstant {
