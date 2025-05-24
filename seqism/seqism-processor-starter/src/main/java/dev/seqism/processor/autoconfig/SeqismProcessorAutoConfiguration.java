@@ -2,7 +2,7 @@ package dev.seqism.processor.autoconfig;
 
 import dev.seqism.processor.config.RabbitConfig;
 import dev.seqism.processor.endpoint.DefaultSeqismMessageListener;
-import dev.seqism.processor.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.ProcessorQueueHelper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 @Import({
     RabbitConfig.class,
     DefaultSeqismMessageListener.class,
-    CoreQueueHelper.class
+    ProcessorQueueHelper.class
 })
 public class SeqismProcessorAutoConfiguration {
 }
