@@ -2,7 +2,7 @@ package dev.seqism.ex.processor.example;
 
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.processor.SeqismProcessor;
-import dev.seqism.processor.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.ProcessorQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class SeqismProcessorSample001 extends SeqismProcessor<String> {
 
-    public SeqismProcessorSample001(ObjectMapper mapper, CoreQueueHelper queueHelper) {
+    public SeqismProcessorSample001(ObjectMapper mapper, ProcessorQueueHelper queueHelper) {
         super(mapper, queueHelper);
     }
 

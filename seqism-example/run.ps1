@@ -15,9 +15,8 @@ function Build-Module($moduleName) {
     if (-not (Test-Path $moduleName)) {
         throw "Directory not found: $moduleName"
     }
-    $absPath = "$((Resolve-Path $moduleName).Path)"
-    $dockerPath = Convert-PathForDocker $absPath
-    $m2Path = "$env:USERPROFILE/.m2"
+    $dockerPath = Convert-PathForDocker "$((Resolve-Path $moduleName).Path)"
+    $m2Path = Convert-PathForDocker "$env:USERPROFILE/.m2"
     docker run --rm -v ${m2Path}:/root/.m2 -v ${dockerPath}:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean install
     if ($LASTEXITCODE -ne 0) {
         throw "Build failed in $moduleName"

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.processor.SeqismProcessor;
-import dev.seqism.processor.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.ProcessorQueueHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 public class SeqismProcessorSample003 extends SeqismProcessor<SeqismProcessorSample003.Sample003Body> {
 
-    public SeqismProcessorSample003(ObjectMapper mapper, CoreQueueHelper queueHelper) {
+    public SeqismProcessorSample003(ObjectMapper mapper, ProcessorQueueHelper queueHelper) {
         super(mapper, queueHelper);
     }
 
