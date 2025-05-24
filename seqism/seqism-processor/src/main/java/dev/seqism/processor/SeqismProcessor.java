@@ -2,13 +2,13 @@ package dev.seqism.processor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.processor.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.ProcessorQueueHelper;
 
 public abstract class SeqismProcessor<T> {
     protected final ObjectMapper mapper;
-    protected final CoreQueueHelper queueHelper;
+    protected final ProcessorQueueHelper queueHelper;
 
-    public SeqismProcessor(ObjectMapper mapper, CoreQueueHelper queueHelper) {
+    public SeqismProcessor(ObjectMapper mapper, ProcessorQueueHelper queueHelper) {
         this.mapper = mapper;
         this.queueHelper = queueHelper;
     }

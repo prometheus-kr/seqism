@@ -4,7 +4,7 @@ import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.processor.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.ProcessorQueueHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
@@ -19,9 +19,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
  */
 @Slf4j
 public abstract class SeqismMessageListener<T> {
-    protected final CoreQueueHelper queueHelper;
+    protected final ProcessorQueueHelper queueHelper;
 
-    SeqismMessageListener(CoreQueueHelper queueHelper) {
+    SeqismMessageListener(ProcessorQueueHelper queueHelper) {
         this.queueHelper = queueHelper;
     }
 

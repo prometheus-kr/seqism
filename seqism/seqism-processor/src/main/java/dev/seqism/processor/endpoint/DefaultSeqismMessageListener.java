@@ -2,7 +2,7 @@ package dev.seqism.processor.endpoint;
 
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismMessage;
-import dev.seqism.processor.helper.CoreQueueHelper;
+import dev.seqism.processor.helper.ProcessorQueueHelper;
 import dev.seqism.processor.SeqismProcessor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +25,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
     private final ObjectMapper mapper;
     private final Map<String, SeqismProcessor<?>> processorMap;
 
-    DefaultSeqismMessageListener(ObjectMapper mapper, CoreQueueHelper queueHelper, List<SeqismProcessor<?>> processors) {
+    DefaultSeqismMessageListener(ObjectMapper mapper, ProcessorQueueHelper queueHelper, List<SeqismProcessor<?>> processors) {
         super(queueHelper);
         this.mapper = mapper;
         this.processorMap = processors.stream().collect(Collectors.toMap(SeqismProcessor::getBizCode, p -> p));

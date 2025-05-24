@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class CoreQueueHelper {
+public class ProcessorQueueHelper {
     private final RabbitTemplate rabbitTemplate;
 
-    public CoreQueueHelper(RabbitTemplate rabbitTemplate) {
+    public ProcessorQueueHelper(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
