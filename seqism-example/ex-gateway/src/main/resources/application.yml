@@ -2,3 +2,13 @@ logging:
   level:
     dev:
       seqism: DEBUG
+
+
+seqism:
+  queue:
+    static:
+      name: seqism-app1-queue
+    command:
+      prefix: seqism-c-queue.
+    response:
+      prefix: seqism-r-queue.
