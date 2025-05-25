@@ -43,7 +43,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
      * This allows for efficient retrieval and management of different processor implementations
      * based on their identifier.
      */
-    private final Map<String, SeqismProcessor<?>> processorMap;
+    private final Map<String, SeqismProcessor<?, ?>> processorMap;
 
     /**
      * Constructs a new {@code DefaultSeqismMessageListener} with the specified {@link ObjectMapper},
@@ -62,7 +62,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
      *            the list of {@link SeqismProcessor} instances to handle different business codes
      */
     DefaultSeqismMessageListener(ObjectMapper mapper, ProcessorQueueHelper queueHelper,
-            List<SeqismProcessor<?>> processors) {
+            List<SeqismProcessor<?, ?>> processors) {
         super(queueHelper);
         this.mapper = mapper;
         this.processorMap = processors.stream().collect(Collectors.toMap(SeqismProcessor::getBizCode, p -> p));
@@ -80,7 +80,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
     @Override
     void proc(SeqismMessage<Object> message) {
         String bizCode = message.getHeader().getBizCode();
-        SeqismProcessor<?> processor = processorMap.get(bizCode);
+        SeqismProcessor<?, ?> processor = processorMap.get(bizCode);
 
         if (processor != null) {
             callProcessor(processor, message);
@@ -94,14 +94,16 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
      * Invokes the specified {@link SeqismProcessor} with a message whose body is converted
      * to the processor's expected type using the configured {@code mapper}.
      *
-     * @param <T>
-     *            the type of the message body expected by the processor
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param processor
      *            the processor to handle the message
      * @param message
      *            the incoming message with a body to be converted and processed
      */
-    <T> void callProcessor(SeqismProcessor<T> processor, SeqismMessage<Object> message) {
+    <R, C> void callProcessor(SeqismProcessor<R, C> processor, SeqismMessage<Object> message) {
         processor.process(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
     }
 }

@@ -14,10 +14,12 @@ import dev.seqism.processor.helper.ProcessorQueueHelper;
  * implement business-specific logic by providing the business code, body type, and
  * message processing implementation.
  *
- * @param <T>
- *            the type of the message body this processor handles
+ * @param <R>
+ *            the type of the response message payload
+ * @param <C>
+ *            the type of the command message payload
  */
-public abstract class SeqismProcessor<T> {
+public abstract class SeqismProcessor<R, C> {
     /**
      * The {@code ObjectMapper} instance used for serializing and deserializing JSON objects.
      * This is typically configured to handle the application's specific data formats.
@@ -49,15 +51,19 @@ public abstract class SeqismProcessor<T> {
      * This method delegates the send-and-receive operation to {@code queueHelper}, then converts the response body
      * to the expected type using the configured {@code mapper}. The returned message contains the converted body.
      *
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the message to send
      * @return the response message with the body converted to the expected type
      * @throws RuntimeException
      *             if the send or receive operation fails
      */
-    protected SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> message) {
-        SeqismMessage<T> response = queueHelper.sendAndReceiveOrThrow(message);
-        T respBody = mapper.convertValue(response.getBody(), getBodyType());
+    protected SeqismMessage<R> sendAndReceiveOrThrow(SeqismMessage<C> message) {
+        SeqismMessage<R> response = queueHelper.sendAndReceiveOrThrow(message);
+        R respBody = mapper.convertValue(response.getBody(), getBodyType());
         return response.withBody(respBody);
     }
 
@@ -68,7 +74,7 @@ public abstract class SeqismProcessor<T> {
      * @param message
      *            the message to be sent as final
      */
-    protected void sendFinal(SeqismMessage<T> message) {
+    protected void sendFinal(SeqismMessage<C> message) {
         queueHelper.sendFinal(message);
     }
 
@@ -85,7 +91,7 @@ public abstract class SeqismProcessor<T> {
      *
      * @return the {@link Class} of the body type {@code T}
      */
-    public abstract Class<T> getBodyType();
+    public abstract Class<R> getBodyType();
 
     /**
      * Processes the given {@link SeqismMessage}.
@@ -97,5 +103,5 @@ public abstract class SeqismProcessor<T> {
      * @param message
      *            the message to process; must not be {@code null}
      */
-    public abstract void process(SeqismMessage<T> message);
+    public abstract void process(SeqismMessage<R> message);
 }

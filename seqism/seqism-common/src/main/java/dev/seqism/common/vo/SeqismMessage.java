@@ -93,11 +93,13 @@ public class SeqismMessage<T> implements Serializable {
      * This method creates a new {@code SeqismMessage} with a failure header based on the given error information,
      * and sets the message body to {@code null}.
      *
+     * @param <U>
+     *            the type of the message body
      * @param errorInfo
      *            the error information to be used for the failure header
      * @return a new {@code SeqismMessage} instance representing a failure, with the specified error information
      */
-    public SeqismMessage<T> toFailure(ErrorInfo errorInfo) {
+    public <U> SeqismMessage<U> toFailure(ErrorInfo errorInfo) {
         return of(header.toFailure(errorInfo), null);
     }
 
@@ -105,6 +107,8 @@ public class SeqismMessage<T> implements Serializable {
      * Converts the current {@code SeqismMessage} to a failure state using the provided {@code ErrorInfo}
      * and an additional error message.
      *
+     * @param <U>
+     *            the type of the message body
      * @param errorInfo
      *            the {@code ErrorInfo} object containing error details
      * @param message
@@ -112,27 +116,27 @@ public class SeqismMessage<T> implements Serializable {
      * @return a new {@code SeqismMessage} instance representing a failure, with the updated error information and no
      *         payload
      */
-    public SeqismMessage<T> toFailure(ErrorInfo errorInfo, String message) {
+    public <U> SeqismMessage<U> toFailure(ErrorInfo errorInfo, String message) {
         return of(header.toFailure(errorInfo.addMessage(message)), null);
     }
 
     /**
      * Returns a new {@code SeqismMessage} instance with the specified body and the existing header.
      *
-     * @param <N>
-     *            the type of the new body
+     * @param <U>
+     *            the type of the message body
      * @param body
      *            the new body to set in the message
      * @return a new {@code SeqismMessage} instance with the same header and the provided body
      */
-    public <N> SeqismMessage<N> withBody(N body) {
+    public <U> SeqismMessage<U> withBody(U body) {
         return of(header, body);
     }
 
     /**
      * Creates a new {@link SeqismMessage} instance with the specified header and body.
      *
-     * @param <T>
+     * @param <U>
      *            the type of the message body
      * @param header
      *            the message header
@@ -140,7 +144,7 @@ public class SeqismMessage<T> implements Serializable {
      *            the message body
      * @return a new {@code SeqismMessage} containing the given header and body
      */
-    static <T> SeqismMessage<T> of(SeqismMessageHeader header, T body) {
-        return new SeqismMessage<T>(header, body);
+    static <U> SeqismMessage<U> of(SeqismMessageHeader header, U body) {
+        return new SeqismMessage<U>(header, body);
     }
 }

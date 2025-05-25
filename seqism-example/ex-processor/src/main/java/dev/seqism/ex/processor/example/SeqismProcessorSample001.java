@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Component
-public class SeqismProcessorSample001 extends SeqismProcessor<String> {
+public class SeqismProcessorSample001 extends SeqismProcessor<String, String> {
 
     public SeqismProcessorSample001(ObjectMapper mapper, ProcessorQueueHelper queueHelper) {
         super(mapper, queueHelper);

@@ -1,6 +1,5 @@
 package dev.seqism.processor.endpoint;
 
-import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;

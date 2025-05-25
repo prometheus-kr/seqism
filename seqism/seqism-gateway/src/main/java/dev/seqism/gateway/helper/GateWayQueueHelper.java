@@ -102,7 +102,8 @@ public class GateWayQueueHelper {
             RabbitTemplate rabbitTemplate,
             QueueNameHelper queueNameHelper,
             @Value("${seqism.queue.delete.timeout:" + SeqismConstant.QUEUE_DELETE_TIME + "}") long queueDeleteTimeout,
-            @Value("${seqism.queue.receive.timeout:" + SeqismConstant.RECEIVE_TIME_OUT + "}") long messageReceiveTimeout) {
+            @Value("${seqism.queue.receive.timeout:" + SeqismConstant.RECEIVE_TIME_OUT
+                    + "}") long messageReceiveTimeout) {
         this.rabbitAdmin = rabbitAdmin;
         this.rabbitTemplate = rabbitTemplate;
         this.queueNameHelper = queueNameHelper;
@@ -111,23 +112,26 @@ public class GateWayQueueHelper {
     }
 
     /**
-     * Sends the given {@link SeqismMessage} to a static queue and waits for a response.
+     * Sends the provided {@link SeqismMessage} to a static queue and waits for a response.
      * <p>
      * This method performs the following steps:
      * <ol>
      * <li>Logs the outgoing message for debugging purposes.</li>
-     * <li>Creates the necessary queues for the message.</li>
-     * <li>Sends the message to a static queue.</li>
+     * <li>Creates the necessary queues for message processing.</li>
+     * <li>Sends the message to a static queue determined by {@code queueNameHelper}.</li>
      * <li>Waits for and returns the response message.</li>
      * </ol>
      *
-     * @param <T>
-     *            the type of the payload contained in the {@link SeqismMessage}
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
-     *            the message to send and receive a response for
-     * @return the response {@link SeqismMessage} received after sending the original message
+     *            the message to send
+     * @return the response message received
      */
-    public <T> SeqismMessage<T> sendAndReceiveInit(SeqismMessage<T> message) { 
+
+    public <R, C> SeqismMessage<C> sendAndReceiveInit(SeqismMessage<R> message) {
         log.debug("Sending message : [{}]", message);
 
         createQueues(message);
@@ -144,13 +148,15 @@ public class GateWayQueueHelper {
      * This method logs the outgoing message, sends it to the appropriate response queue,
      * and then calls {@link #receive(SeqismMessage)} to wait for and return the next message.
      *
-     * @param <T>
-     *            the type of the payload contained in the {@link SeqismMessage}
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the message to send and await a response for
      * @return the next {@link SeqismMessage} received in response
      */
-    public <T> SeqismMessage<T> sendAndReceiveNext(SeqismMessage<T> message) {
+    public <R, C> SeqismMessage<C> sendAndReceiveNext(SeqismMessage<R> message) {
         log.debug("Sending message : [{}]", message);
         String tranId = message.getHeader().getTranId();
 
@@ -227,25 +233,25 @@ public class GateWayQueueHelper {
      * If no message is received within the timeout or the message status is not {@code IN_PROGRESS},
      * deletes both the command and response queues associated with the transaction ID.
      * 
-     * @param <T>
-     *            the type of the payload in the {@link SeqismMessage}
+     * @param <R> the type of the response message payload
+     * @param <C> the type of the command message payload
      * @param message
      *            the reference message containing the transaction ID and header information
      * @return the received {@link SeqismMessage} of type {@code T}, or {@code null} if no message was received
      * @throws SeqismException
      *             if an AMQP error occurs during message reception
      */
-    <T> SeqismMessage<T> receive(SeqismMessage<T> message) {
+    <R, C> SeqismMessage<C> receive(SeqismMessage<R> message) {
         String tranId = message.getHeader().getTranId();
 
         String commandQueue = queueNameHelper.getCommandQueueName(tranId);
         String responseQueue = queueNameHelper.getResponseQueueName(tranId);
 
-        ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>() {
+        ParameterizedTypeReference<SeqismMessage<C>> typeRef = new ParameterizedTypeReference<SeqismMessage<C>>() {
         };
 
         try {
-            SeqismMessage<T> receivedMsg //
+            SeqismMessage<C> receivedMsg //
                     = rabbitTemplate.receiveAndConvert(commandQueue, this.messageReceiveTimeout, typeRef);
             log.debug("Received message : [{}]", receivedMsg);
 

@@ -18,7 +18,8 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class SeqismProcessorSample003 extends SeqismProcessor<SeqismProcessorSample003.Sample003Body> {
+public class SeqismProcessorSample003
+        extends SeqismProcessor<SeqismProcessorSample003.Sample003Body, SeqismProcessorSample003.Sample003Body> {
 
     public SeqismProcessorSample003(ObjectMapper mapper, ProcessorQueueHelper queueHelper) {
         super(mapper, queueHelper);
