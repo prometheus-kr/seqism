@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dev.seqism.common.constant.SeqismConstant;
 import dev.seqism.common.helper.QueueNameHelper;
 
 /**
@@ -18,25 +19,22 @@ import dev.seqism.common.helper.QueueNameHelper;
  * This class defines beans for message conversion, RabbitMQ template, administration,
  * queue declaration, and queue name management. It leverages Jackson for JSON
  * serialization/deserialization of messages and provides configurable queue names
- * via application properties.
+ * and prefixes via application properties.
  *
  * <ul>
  * <li>Configures a {@link Jackson2JsonMessageConverter} for JSON message conversion.</li>
  * <li>Defines a {@link RabbitTemplate} for sending and receiving messages with JSON support.</li>
  * <li>Provides a {@link RabbitAdmin} for managing AMQP resources such as queues and exchanges.</li>
  * <li>Declares a configurable RabbitMQ {@link Queue} bean.</li>
- * <li>Supplies a {@link QueueNameHelper} bean for managing queue name conventions.</li>
+ * <li>Creates a {@link QueueNameHelper} bean for managing queue names and prefixes.</li>
  * </ul>
  *
  * <p>
  * Queue names and prefixes can be customized via the following application properties:
  * <ul>
- * <li><code>seqism.queue.static.name</code> - Name of the static queue (default:
- * <code>seqism-static-queue</code>).</li>
- * <li><code>seqism.queue.command.prefix</code> - Prefix for command queues (default:
- * <code>seqism-command-queue.</code>).</li>
- * <li><code>seqism.queue.response.prefix</code> - Prefix for response queues (default:
- * <code>seqism-response-queue.</code>).</li>
+ * <li><code>seqism.queue.static.name</code> (defaults to {@link SeqismConstant#SEQISM_STATIC_QUEUE})</li>
+ * <li><code>seqism.queue.command.prefix</code> (defaults to {@link SeqismConstant#COMMAND_QUEUE_PREFIX})</li>
+ * <li><code>seqism.queue.response.prefix</code> (defaults to {@link SeqismConstant#RESPONSE_QUEUE_PREFIX})</li>
  * </ul>
  */
 @Configuration
@@ -101,26 +99,32 @@ public class RabbitConfig {
      * @return a new {@link Queue} instance with the specified name
      */
     @Bean
-    public Queue queue(@Value("${seqism.queue.static.name:seqism-static-queue}") String queueName) {
+    public Queue queue(
+            @Value("${seqism.queue.static.name:" + SeqismConstant.SEQISM_STATIC_QUEUE + "}") String queueName) {
         return new Queue(queueName);
     }
 
     /**
-     * Creates and configures a {@link QueueNameHelper} bean with queue name properties.
+     * Creates a {@link QueueNameHelper} bean configured with queue names and prefixes.
      *
      * @param staticQueueName
-     *            the name of the static queue, defaults to "seqism-static-queue" if not specified
+     *            the name of the static queue, resolved from the property
+     *            {@code seqism.queue.static.name} or defaults to {@link SeqismConstant#SEQISM_STATIC_QUEUE}
      * @param commandQueuePrefix
-     *            the prefix for command queues, defaults to "seqism-command-queue." if not specified
+     *            the prefix for command queues, resolved from the property
+     *            {@code seqism.queue.command.prefix} or defaults to {@link SeqismConstant#COMMAND_QUEUE_PREFIX}
      * @param responseQueuePrefix
-     *            the prefix for response queues, defaults to "seqism-response-queue." if not specified
+     *            the prefix for response queues, resolved from the property
+     *            {@code seqism.queue.response.prefix} or defaults to {@link SeqismConstant#RESPONSE_QUEUE_PREFIX}
      * @return a configured {@link QueueNameHelper} instance
      */
     @Bean
     public QueueNameHelper queueNameHelper(
-            @Value("${seqism.queue.static.name:seqism-static-queue}") String staticQueueName,
-            @Value("${seqism.queue.command.prefix:seqism-command-queue.}") String commandQueuePrefix,
-            @Value("${seqism.queue.response.prefix:seqism-response-queue.}") String responseQueuePrefix) {
+            @Value("${seqism.queue.static.name:" + SeqismConstant.SEQISM_STATIC_QUEUE + "}") String staticQueueName,
+            @Value("${seqism.queue.command.prefix:" + SeqismConstant.COMMAND_QUEUE_PREFIX
+                    + "}") String commandQueuePrefix,
+            @Value("${seqism.queue.response.prefix:" + SeqismConstant.RESPONSE_QUEUE_PREFIX
+                    + "}") String responseQueuePrefix) {
         return new QueueNameHelper(staticQueueName, commandQueuePrefix, responseQueuePrefix);
     }
 }

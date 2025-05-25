@@ -6,7 +6,6 @@ import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessageStatus;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.amqp.AmqpException;
@@ -14,41 +13,44 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 /**
- * Helper component for managing RabbitMQ queues and message exchange in the gateway.
+ * Helper class for managing RabbitMQ queues and message exchange within the gateway.
  * <p>
- * This class provides methods to:
+ * GateWayQueueHelper provides utility methods to:
  * <ul>
- * <li>Create command and response queues for a transaction.</li>
- * <li>Send and receive messages synchronously using RabbitMQ.</li>
- * <li>Handle queue declaration and deletion based on message status.</li>
+ * <li>Declare and delete command/response queues dynamically based on transaction IDs.</li>
+ * <li>Send and receive {@link SeqismMessage} objects to/from specific queues, handling request/response patterns.</li>
+ * <li>Enforce queue expiration and message receive timeouts as configured in application properties.</li>
+ * <li>Handle AMQP errors and propagate them as {@link SeqismException} with appropriate error codes.</li>
  * </ul>
- * 
  * <p>
- * Usage:
+ * This class leverages {@link RabbitAdmin} for queue administration, {@link RabbitTemplate} for message operations,
+ * and {@link QueueNameHelper} for consistent queue naming conventions.
+ * <p>
+ * Typical usage involves:
+ * <ol>
+ * <li>Creating queues for a transaction using {@link #createQueues(SeqismMessage)}.</li>
+ * <li>Sending a message and waiting for a response using {@link #sendAndReceiveInit(SeqismMessage)} or
+ * {@link #sendAndReceiveNext(SeqismMessage)}.</li>
+ * <li>Automatically deleting queues when no longer needed or when message processing is complete.</li>
+ * </ol>
+ * <p>
+ * Queue expiration and message receive timeouts are configurable via application properties:
  * <ul>
- * <li>{@link #sendAndReceiveInit(SeqismMessage)} - Initializes queues and sends the initial message.</li>
- * <li>{@link #sendAndReceiveNext(SeqismMessage)} - Sends a message to the response queue and waits for a reply.</li>
+ * <li><b>seqism.queue.delete.timeout</b>: Queue expiration time in milliseconds (default:
+ * {@link SeqismConstant#QUEUE_DELETE_TIME}).</li>
+ * <li><b>seqism.queue.receive.timeout</b>: Message receive timeout in milliseconds (default:
+ * {@link SeqismConstant#RECEIVE_TIME_OUT}).</li>
  * </ul>
- * 
  * <p>
- * Queues are automatically deleted if a message is not received within the timeout or if the message status is not
- * {@code IN_PROGRESS}.
- * 
- * <p>
- * Exceptions are wrapped in {@link SeqismException} with appropriate error codes.
- * 
- * @see RabbitAdmin
- * @see RabbitTemplate
- * @see SeqismMessage
- * @see QueueNameHelper
+ * All operations are logged for debugging and traceability.
  */
 @Slf4j
 @Component
-@AllArgsConstructor
 public class GateWayQueueHelper {
     /**
      * An instance of {@link RabbitAdmin} used to manage AMQP resources such as queues, exchanges, and bindings
@@ -67,6 +69,46 @@ public class GateWayQueueHelper {
      * Used to ensure consistent naming conventions for message queues.
      */
     private final QueueNameHelper queueNameHelper;
+    /**
+     * Queue expiration time (ms), loaded from application properties.
+     * If not set, defaults to SeqismConstant.QUEUE_DELETE_TIME.
+     */
+    private final long queueDeleteTimeout;
+    /**
+     * The maximum time in milliseconds to wait for a message to be received from the queue
+     * before timing out. A value of zero indicates an immediate timeout, while a negative
+     * value may indicate an indefinite wait, depending on implementation.
+     */
+    private final long messageReceiveTimeout;
+
+    /**
+     * Constructs a new {@code GateWayQueueHelper} instance with the specified dependencies and configuration values.
+     *
+     * @param rabbitAdmin
+     *            the {@link RabbitAdmin} instance used for managing AMQP resources.
+     * @param rabbitTemplate
+     *            the {@link RabbitTemplate} instance used for sending and receiving messages.
+     * @param queueNameHelper
+     *            the {@link QueueNameHelper} used for generating and managing queue names.
+     * @param queueDeleteTimeout
+     *            the timeout (in milliseconds) for deleting queues, injected from the property
+     *            {@code seqism.queue.delete.timeout} or defaults to {@code SeqismConstant.QUEUE_DELETE_TIME}.
+     * @param messageReceiveTimeout
+     *            the timeout (in milliseconds) for receiving messages, injected from the property
+     *            {@code seqism.queue.receive.timeout} or defaults to {@code SeqismConstant.RECEIVE_TIME_OUT}.
+     */
+    public GateWayQueueHelper(
+            RabbitAdmin rabbitAdmin,
+            RabbitTemplate rabbitTemplate,
+            QueueNameHelper queueNameHelper,
+            @Value("${seqism.queue.delete.timeout:" + SeqismConstant.QUEUE_DELETE_TIME + "}") long queueDeleteTimeout,
+            @Value("${seqism.queue.receive.timeout:" + SeqismConstant.RECEIVE_TIME_OUT + "}") long messageReceiveTimeout) {
+        this.rabbitAdmin = rabbitAdmin;
+        this.rabbitTemplate = rabbitTemplate;
+        this.queueNameHelper = queueNameHelper;
+        this.queueDeleteTimeout = queueDeleteTimeout;
+        this.messageReceiveTimeout = messageReceiveTimeout;
+    }
 
     /**
      * Sends the given {@link SeqismMessage} to a static queue and waits for a response.
@@ -85,7 +127,7 @@ public class GateWayQueueHelper {
      *            the message to send and receive a response for
      * @return the response {@link SeqismMessage} received after sending the original message
      */
-    public <T> SeqismMessage<T> sendAndReceiveInit(SeqismMessage<T> message) {
+    public <T> SeqismMessage<T> sendAndReceiveInit(SeqismMessage<T> message) { 
         log.debug("Sending message : [{}]", message);
 
         createQueues(message);
@@ -145,7 +187,7 @@ public class GateWayQueueHelper {
      */
     void declareQueue(String queueName) {
         Queue queue = QueueBuilder.durable(queueName)
-                .withArgument("x-expires", SeqismConstant.QUEUE_DELETE_TIME)
+                .withArgument("x-expires", this.queueDeleteTimeout)
                 .build();
         rabbitAdmin.declareQueue(queue);
     }
@@ -204,7 +246,7 @@ public class GateWayQueueHelper {
 
         try {
             SeqismMessage<T> receivedMsg //
-                    = rabbitTemplate.receiveAndConvert(commandQueue, SeqismConstant.RECEIVE_TIME_OUT, typeRef);
+                    = rabbitTemplate.receiveAndConvert(commandQueue, this.messageReceiveTimeout, typeRef);
             log.debug("Received message : [{}]", receivedMsg);
 
             if (receivedMsg == null || receivedMsg.getHeader().getStatus() != SeqismMessageStatus.IN_PROGRESS) {

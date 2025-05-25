@@ -13,3 +13,5 @@ seqism:
       prefix: seqism-command-queue.
     response:
       prefix: seqism-response-queue.
+    receive:
+      timeout: 5000

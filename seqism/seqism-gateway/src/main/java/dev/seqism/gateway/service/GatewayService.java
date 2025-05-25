@@ -25,6 +25,7 @@ import java.util.function.Function;
  *
  * <p>
  * Usage:
+ * 
  * <pre>
  *     GatewayService service = ...;
  *     SeqismMessage&lt;T&gt; response = service.initSeqism(message);
