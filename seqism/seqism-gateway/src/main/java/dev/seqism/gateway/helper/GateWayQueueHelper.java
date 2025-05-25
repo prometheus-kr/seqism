@@ -6,6 +6,7 @@ import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
 import dev.seqism.common.vo.SeqismMessageStatus;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.amqp.AmqpException;
@@ -47,6 +48,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@AllArgsConstructor
 public class GateWayQueueHelper {
     /**
      * An instance of {@link RabbitAdmin} used to manage AMQP resources such as queues, exchanges, and bindings
@@ -60,20 +62,11 @@ public class GateWayQueueHelper {
      * such as publishing and consuming messages within the gateway.
      */
     private final RabbitTemplate rabbitTemplate;
-
     /**
-     * Constructs a new {@code GateWayQueueHelper} with the specified {@link RabbitAdmin} and {@link RabbitTemplate}.
-     *
-     * @param rabbitAdmin
-     *            the {@code RabbitAdmin} instance used for managing AMQP resources such as queues, exchanges, and
-     *            bindings
-     * @param rabbitTemplate
-     *            the {@code RabbitTemplate} instance used for sending and receiving messages to/from RabbitMQ
+     * Helper class responsible for generating and managing queue names within the gateway.
+     * Used to ensure consistent naming conventions for message queues.
      */
-    public GateWayQueueHelper(RabbitAdmin rabbitAdmin, RabbitTemplate rabbitTemplate) {
-        this.rabbitAdmin = rabbitAdmin;
-        this.rabbitTemplate = rabbitTemplate;
-    }
+    private final QueueNameHelper queueNameHelper;
 
     /**
      * Sends the given {@link SeqismMessage} to a static queue and waits for a response.
@@ -97,7 +90,7 @@ public class GateWayQueueHelper {
 
         createQueues(message);
 
-        send(QueueNameHelper.getStaticQueueName(), message);
+        send(queueNameHelper.getStaticQueueName(), message);
         return receive(message);
     }
 
@@ -119,7 +112,7 @@ public class GateWayQueueHelper {
         log.debug("Sending message : [{}]", message);
         String tranId = message.getHeader().getTranId();
 
-        send(QueueNameHelper.getResponseQueueName(tranId), message);
+        send(queueNameHelper.getResponseQueueName(tranId), message);
         return receive(message);
     }
 
@@ -135,8 +128,8 @@ public class GateWayQueueHelper {
     void createQueues(SeqismMessage<?> message) {
         String tranId = message.getHeader().getTranId();
 
-        String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
-        String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
+        String commandQueue = queueNameHelper.getCommandQueueName(tranId);
+        String responseQueue = queueNameHelper.getResponseQueueName(tranId);
 
         declareQueue(commandQueue);
         declareQueue(responseQueue);
@@ -203,8 +196,8 @@ public class GateWayQueueHelper {
     <T> SeqismMessage<T> receive(SeqismMessage<T> message) {
         String tranId = message.getHeader().getTranId();
 
-        String commandQueue = QueueNameHelper.getCommandQueueName(tranId);
-        String responseQueue = QueueNameHelper.getResponseQueueName(tranId);
+        String commandQueue = queueNameHelper.getCommandQueueName(tranId);
+        String responseQueue = queueNameHelper.getResponseQueueName(tranId);
 
         ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>() {
         };

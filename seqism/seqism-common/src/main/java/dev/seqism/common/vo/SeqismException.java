@@ -11,8 +11,6 @@ package dev.seqism.common.vo;
  * condition, represented by an {@code ErrorInfo} instance, is encountered.
  *
  * @see ErrorInfo
- *
- * @since 0.0.1
  */
 public class SeqismException extends RuntimeException {
     /**

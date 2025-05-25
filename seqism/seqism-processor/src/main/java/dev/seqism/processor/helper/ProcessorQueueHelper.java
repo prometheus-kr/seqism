@@ -5,6 +5,7 @@ import dev.seqism.common.helper.QueueNameHelper;
 import dev.seqism.common.vo.ErrorInfo;
 import dev.seqism.common.vo.SeqismException;
 import dev.seqism.common.vo.SeqismMessage;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.amqp.AmqpException;
@@ -13,25 +14,28 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 /**
- * Helper component for sending and receiving messages via RabbitMQ queues in the Seqism processor.
+ * Helper class for managing message sending and receiving operations with RabbitMQ queues
+ * in the processor module. Provides convenient methods for sending messages to command queues,
+ * receiving responses from response queues, and handling message exchange patterns such as
+ * request-response and final message dispatch.
  * <p>
- * This class provides utility methods to send messages to command queues and receive responses from response queues,
- * handling exceptions and logging as necessary. It abstracts the interaction with RabbitMQ using the
- * {@link RabbitTemplate}.
- *
+ * Utilizes {@link RabbitTemplate} for interacting with RabbitMQ and {@link QueueNameHelper}
+ * for dynamic queue name resolution based on transaction IDs.
  * <p>
- * Main responsibilities:
+ * Main responsibilities include:
  * <ul>
- * <li>Send messages to the appropriate command queue based on transaction ID.</li>
- * <li>Receive and convert messages from the corresponding response queue, with timeout and error handling.</li>
- * <li>Log message sending and receiving events for debugging and traceability.</li>
+ * <li>Sending messages to command queues and handling AMQP exceptions.</li>
+ * <li>Receiving messages from response queues with timeout and error handling.</li>
+ * <li>Supporting request-response patterns via {@code sendAndReceiveOrThrow}.</li>
+ * <li>Sending final messages to queues.</li>
  * </ul>
- *
  * <p>
- * Exceptions are wrapped in {@link SeqismException} with appropriate error codes from {@link ErrorInfo}.
+ * All exceptions related to message operations are wrapped in {@link SeqismException}
+ * with appropriate error information.
  */
 @Slf4j
 @Component
+@AllArgsConstructor
 public class ProcessorQueueHelper {
     /**
      * The {@code RabbitTemplate} instance used for sending and receiving messages
@@ -40,16 +44,10 @@ public class ProcessorQueueHelper {
      * messages, as well as receiving and converting messages.
      */
     private final RabbitTemplate rabbitTemplate;
-
     /**
-     * Constructs a new {@code ProcessorQueueHelper} with the specified {@link RabbitTemplate}.
-     *
-     * @param rabbitTemplate
-     *            the {@code RabbitTemplate} used for interacting with the message queue
+     * Helper instance for managing and generating queue names within the processor.
      */
-    public ProcessorQueueHelper(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
+    private final QueueNameHelper queueNameHelper;
 
     /**
      * Sends the specified {@link SeqismMessage} and waits for a corresponding response.
@@ -100,7 +98,7 @@ public class ProcessorQueueHelper {
      */
     <T> void sendMessage(SeqismMessage<T> message) {
         log.debug("Sending message : [{}]", message);
-        String commandQueueName = QueueNameHelper.getCommandQueueName(message.getHeader().getTranId());
+        String commandQueueName = queueNameHelper.getCommandQueueName(message.getHeader().getTranId());
 
         try {
             rabbitTemplate.convertAndSend(commandQueueName, message);
@@ -127,7 +125,7 @@ public class ProcessorQueueHelper {
      *             if a timeout occurs or an AMQP error is encountered while receiving the message
      */
     <T> SeqismMessage<T> receivedMessage(SeqismMessage<T> message) {
-        String responseQueueName = QueueNameHelper.getResponseQueueName(message.getHeader().getTranId());
+        String responseQueueName = queueNameHelper.getResponseQueueName(message.getHeader().getTranId());
         ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>() {
         };
 

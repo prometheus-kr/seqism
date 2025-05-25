@@ -7,8 +7,6 @@ package dev.seqism.common.vo;
  * <li>{@link #SUCCESS} - The message has been processed successfully.</li>
  * <li>{@link #FAILURE} - The message processing has failed.</li>
  * </ul>
- *
- * @since 0.0.1
  */
 public enum SeqismMessageStatus {
     /**

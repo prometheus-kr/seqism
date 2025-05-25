@@ -29,7 +29,6 @@ import java.util.function.Function;
  *     GatewayService service = ...;
  *     SeqismMessage&lt;T&gt; response = service.initSeqism(message);
  * </pre>
- *
  */
 @Slf4j
 @Service
