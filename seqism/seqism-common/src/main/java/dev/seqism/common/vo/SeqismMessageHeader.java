@@ -19,8 +19,6 @@ import lombok.Data;
  * SeqismMessageHeader header = new SeqismMessageHeader("BIZ001", "TX123", SeqismMessageStatus.IN_PROGRESS, null);
  * SeqismMessageHeader successHeader = header.toSuccess();
  * </pre>
- *
- * @since 0.0.1
  */
 @Data
 @AllArgsConstructor

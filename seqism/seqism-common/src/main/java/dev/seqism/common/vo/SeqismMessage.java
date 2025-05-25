@@ -32,8 +32,6 @@ import lombok.Data;
  *
  * @see SeqismMessageHeader
  * @see ErrorInfo
- *
- * @since 0.0.1
  */
 @Data
 @AllArgsConstructor

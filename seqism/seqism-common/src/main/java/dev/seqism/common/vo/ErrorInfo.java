@@ -34,8 +34,6 @@ import lombok.Data;
  *
  * <p>
  * This class is immutable and serializable.
- *
- * @since 0.0.1
  */
 @Data
 @AllArgsConstructor

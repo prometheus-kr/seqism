@@ -6,10 +6,11 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import dev.seqism.common.constant.SeqismConstant;
+import dev.seqism.common.helper.QueueNameHelper;
 
 /**
  * Configuration class for setting up RabbitMQ integration in the application.
@@ -28,7 +29,6 @@ import dev.seqism.common.constant.SeqismConstant;
 @Configuration
 @EnableRabbit
 public class RabbitConfig {
-
     /**
      * Creates a {@link Jackson2JsonMessageConverter} bean for converting messages to and from JSON
      * using the Jackson library. This converter is typically used with Spring AMQP to automatically
@@ -77,13 +77,37 @@ public class RabbitConfig {
     }
 
     /**
-     * Defines a RabbitMQ queue bean with the name specified by {@link SeqismConstant#SEQISM_STATIC_QUEUE}.
-     * This queue will be managed by the Spring container and can be injected where needed.
+     * Defines a RabbitMQ queue bean with a configurable name.
+     * <p>
+     * The queue name is injected from the application properties using the key
+     * {@code seqism.queue.static.name}. If the property is not set, it defaults to
+     * {@code seqism-static-queue}.
      *
-     * @return a new instance of {@link org.springframework.amqp.core.Queue}
+     * @param queueName
+     *            the name of the queue, resolved from application properties
+     * @return a new {@link Queue} instance with the specified name
      */
     @Bean
-    public Queue queue() {
-        return new Queue(SeqismConstant.SEQISM_STATIC_QUEUE);
+    public Queue queue(@Value("${seqism.queue.static.name:seqism-static-queue}") String queueName) {
+        return new Queue(queueName);
+    }
+
+    /**
+     * Creates and configures a {@link QueueNameHelper} bean with queue name properties.
+     *
+     * @param staticQueueName
+     *            the name of the static queue, defaults to "seqism-static-queue" if not specified
+     * @param commandQueuePrefix
+     *            the prefix for command queues, defaults to "seqism-command-queue." if not specified
+     * @param responseQueuePrefix
+     *            the prefix for response queues, defaults to "seqism-response-queue." if not specified
+     * @return a configured {@link QueueNameHelper} instance
+     */
+    @Bean
+    public QueueNameHelper queueNameHelper(
+            @Value("${seqism.queue.static.name:seqism-static-queue}") String staticQueueName,
+            @Value("${seqism.queue.command.prefix:seqism-command-queue.}") String commandQueuePrefix,
+            @Value("${seqism.queue.response.prefix:seqism-response-queue.}") String responseQueuePrefix) {
+        return new QueueNameHelper(staticQueueName, commandQueuePrefix, responseQueuePrefix);
     }
 }

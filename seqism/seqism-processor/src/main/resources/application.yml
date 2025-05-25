@@ -4,3 +4,12 @@ spring:
     port: 5672
     username: guest
     password: guest
+
+seqism:
+  queue:
+    static:
+      name: seqism-static-queue
+    command:
+      prefix: seqism-command-queue.
+    response:
+      prefix: seqism-response-queue.
