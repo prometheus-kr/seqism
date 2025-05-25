@@ -12,12 +12,21 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 
 /**
- * Abstract base class for message listeners that process {@link SeqismMessage} objects.
+ * Abstract base class for message listeners that process {@link SeqismMessage} instances
+ * received from a RabbitMQ queue. This listener handles asynchronous message processing,
+ * error handling, and failure message dispatching using a {@link ProcessorQueueHelper}.
  * <p>
- * Subclasses must implement the {@link #proc(SeqismMessage)} method to define custom processing logic.
- * This class handles asynchronous execution of message processing and error handling.
- * If an exception occurs during processing, it logs the error and sends a failure message using
- * {@link ProcessorQueueHelper}.
+ * Subclasses must implement the {@link #proc(SeqismMessage)} method to define custom
+ * message processing logic for messages of type {@code T}.
+ *
+ * <p>
+ * Error handling is performed as follows:
+ * <ul>
+ * <li>If a {@link SeqismException} is thrown during processing, the error is logged and
+ * a failure message with the associated error information is sent to the final queue.</li>
+ * <li>For any other exceptions, the error is logged and a generic failure message with
+ * error code {@link ErrorInfo#ERROR_0002_0002} and the exception message is sent.</li>
+ * </ul>
  *
  * @param <T>
  *            the type of the payload contained in the {@link SeqismMessage}
@@ -41,17 +50,17 @@ public abstract class SeqismMessageListener<T> {
     }
 
     /**
-     * Handles incoming messages from the RabbitMQ queue specified by {@link SeqismConstant#SEQISM_STATIC_QUEUE}.
-     * Processes the message asynchronously using {@link CompletableFuture#runAsync(Runnable)}.
-     * <p>
-     * If a {@link SeqismException} occurs during processing, logs the error and sends a failure response
-     * with the specific error information. For any other exceptions, logs the error and sends a generic
-     * failure response with a standard error code and the exception message.
+     * Handles incoming messages from the configured RabbitMQ queue asynchronously.
+     * Processes the received {@link SeqismMessage} using the {@code proc} method.
+     * If a {@link SeqismException} occurs during processing, logs the error and sends a failure message
+     * with the associated error information to the final queue.
+     * For any other exceptions, logs the error and sends a generic failure message with error code
+     * {@link ErrorInfo#ERROR_0002_0002} and the exception message.
      *
      * @param message
-     *            the {@link SeqismMessage} to be processed
+     *            the message received from the queue to be processed
      */
-    @RabbitListener(queues = SeqismConstant.SEQISM_STATIC_QUEUE)
+    @RabbitListener(queues = "${seqism.queue.static.name:seqism-static-queue}")
     public void handleMessage(SeqismMessage<T> message) {
         CompletableFuture.runAsync(() -> {
             try {
