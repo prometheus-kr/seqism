@@ -470,4 +470,81 @@ $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body 
 }'
 Test-SeqismResponse $response $expected
 
+
+
+# Sample004 테스트
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body (@{
+    header = @{ bizCode = "Sample004" }
+    body = @{ number = "42" }
+} | ConvertTo-Json)
+$expected = '{
+  "header": {
+    "bizCode": "Sample004",
+    "tranId": "dummy-tran-id",
+    "status": "IN_PROGRESS",
+    "error": null
+  },
+  "body": {
+    "result": "C",
+    "ssString": "11111111111"
+  }
+}'
+Test-SeqismResponse $response $expected
+
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
+    header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
+    body = @{ number = "42" }
+} | ConvertTo-Json)
+$expected = '{
+  "header": {
+    "bizCode": "Sample004",
+    "tranId": "dummy-tran-id",
+    "status": "IN_PROGRESS",
+    "error": null
+  },
+  "body": {
+    "result": "C",
+    "ssString": "22222222222"
+  }
+}'
+Test-SeqismResponse $response $expected
+
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
+    header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
+    body = @{ number = "42" }
+} | ConvertTo-Json)
+$expected = '{
+  "header": {
+    "bizCode": "Sample004",
+    "tranId": "dummy-tran-id",
+    "status": "IN_PROGRESS",
+    "error": null
+  },
+  "body": {
+    "result": "C",
+    "ssString": "33333333333"
+  }
+}'
+Test-SeqismResponse $response $expected
+
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
+    header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
+    body = @{ number = "42" }
+} | ConvertTo-Json)
+$expected = '{
+  "header": {
+    "bizCode": "Sample004",
+    "tranId": "dummy-tran-id",
+    "status": "SUCCESS",
+    "error": null
+  },
+  "body": {
+    "result": "C",
+    "ssString": "44444444444"
+  }
+}'
+Test-SeqismResponse $response $expected
+
+
+
 Write-Host "Test completed!"

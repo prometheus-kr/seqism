@@ -102,7 +102,8 @@ public class GateWayQueueHelper {
             RabbitTemplate rabbitTemplate,
             QueueNameHelper queueNameHelper,
             @Value("${seqism.queue.delete.timeout:" + SeqismConstant.QUEUE_DELETE_TIME + "}") long queueDeleteTimeout,
-            @Value("${seqism.queue.receive.timeout:" + SeqismConstant.RECEIVE_TIME_OUT + "}") long messageReceiveTimeout) {
+            @Value("${seqism.queue.receive.timeout:" + SeqismConstant.RECEIVE_TIME_OUT
+                    + "}") long messageReceiveTimeout) {
         this.rabbitAdmin = rabbitAdmin;
         this.rabbitTemplate = rabbitTemplate;
         this.queueNameHelper = queueNameHelper;
@@ -127,7 +128,7 @@ public class GateWayQueueHelper {
      *            the message to send and receive a response for
      * @return the response {@link SeqismMessage} received after sending the original message
      */
-    public <T> SeqismMessage<T> sendAndReceiveInit(SeqismMessage<T> message) { 
+    public <R, C> SeqismMessage<C> sendAndReceiveInit(SeqismMessage<R> message) {
         log.debug("Sending message : [{}]", message);
 
         createQueues(message);
@@ -150,7 +151,7 @@ public class GateWayQueueHelper {
      *            the message to send and await a response for
      * @return the next {@link SeqismMessage} received in response
      */
-    public <T> SeqismMessage<T> sendAndReceiveNext(SeqismMessage<T> message) {
+    public <R, C> SeqismMessage<C> sendAndReceiveNext(SeqismMessage<R> message) {
         log.debug("Sending message : [{}]", message);
         String tranId = message.getHeader().getTranId();
 
@@ -235,17 +236,17 @@ public class GateWayQueueHelper {
      * @throws SeqismException
      *             if an AMQP error occurs during message reception
      */
-    <T> SeqismMessage<T> receive(SeqismMessage<T> message) {
+    <R, C> SeqismMessage<C> receive(SeqismMessage<R> message) {
         String tranId = message.getHeader().getTranId();
 
         String commandQueue = queueNameHelper.getCommandQueueName(tranId);
         String responseQueue = queueNameHelper.getResponseQueueName(tranId);
 
-        ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>() {
+        ParameterizedTypeReference<SeqismMessage<C>> typeRef = new ParameterizedTypeReference<SeqismMessage<C>>() {
         };
 
         try {
-            SeqismMessage<T> receivedMsg //
+            SeqismMessage<C> receivedMsg //
                     = rabbitTemplate.receiveAndConvert(commandQueue, this.messageReceiveTimeout, typeRef);
             log.debug("Received message : [{}]", receivedMsg);
 

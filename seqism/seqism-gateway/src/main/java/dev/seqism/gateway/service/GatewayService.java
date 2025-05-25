@@ -60,7 +60,7 @@ public class GatewayService {
      *            the message to initialize and send
      * @return the response message received after initialization
      */
-    public <T> SeqismMessage<T> initSeqism(SeqismMessage<T> message) {
+    public <R, C> SeqismMessage<C> initSeqism(SeqismMessage<R> message) {
         return sendAndReceive(message.toInProgress(generateTranId()), queueHelper::sendAndReceiveInit);
     }
 
@@ -74,7 +74,7 @@ public class GatewayService {
      *            the message to be processed and forwarded to the next queue
      * @return the response message received after processing the input message
      */
-    public <T> SeqismMessage<T> nextSeqism(SeqismMessage<T> message) {
+    public <R, C> SeqismMessage<C> nextSeqism(SeqismMessage<R> message) {
         return sendAndReceive(message.toInProgress(), queueHelper::sendAndReceiveNext);
     }
 
@@ -105,9 +105,10 @@ public class GatewayService {
      *            the function that sends the message and returns a response
      * @return the response message, or a failure message if an error occurs
      */
-    <T> SeqismMessage<T> sendAndReceive(SeqismMessage<T> message, Function<SeqismMessage<T>, SeqismMessage<T>> sender) {
+    <R, C> SeqismMessage<C> sendAndReceive(SeqismMessage<R> message,
+            Function<SeqismMessage<R>, SeqismMessage<C>> sender) {
         try {
-            SeqismMessage<T> response = sender.apply(message);
+            SeqismMessage<C> response = sender.apply(message);
             return response != null ? response : message.toFailure(ErrorInfo.ERROR_0001_0002);
         } catch (SeqismException e) {
             log.error("Error in GatewayService", e);

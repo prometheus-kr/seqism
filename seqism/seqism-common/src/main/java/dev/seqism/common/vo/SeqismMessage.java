@@ -97,7 +97,7 @@ public class SeqismMessage<T> implements Serializable {
      *            the error information to be used for the failure header
      * @return a new {@code SeqismMessage} instance representing a failure, with the specified error information
      */
-    public SeqismMessage<T> toFailure(ErrorInfo errorInfo) {
+    public <U> SeqismMessage<U> toFailure(ErrorInfo errorInfo) {
         return of(header.toFailure(errorInfo), null);
     }
 
@@ -112,7 +112,7 @@ public class SeqismMessage<T> implements Serializable {
      * @return a new {@code SeqismMessage} instance representing a failure, with the updated error information and no
      *         payload
      */
-    public SeqismMessage<T> toFailure(ErrorInfo errorInfo, String message) {
+    public <U> SeqismMessage<U> toFailure(ErrorInfo errorInfo, String message) {
         return of(header.toFailure(errorInfo.addMessage(message)), null);
     }
 
@@ -140,7 +140,7 @@ public class SeqismMessage<T> implements Serializable {
      *            the message body
      * @return a new {@code SeqismMessage} containing the given header and body
      */
-    static <T> SeqismMessage<T> of(SeqismMessageHeader header, T body) {
-        return new SeqismMessage<T>(header, body);
+    static <U> SeqismMessage<U> of(SeqismMessageHeader header, U body) {
+        return new SeqismMessage<U>(header, body);
     }
 }

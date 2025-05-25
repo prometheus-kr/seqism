@@ -90,7 +90,7 @@ public class ProcessorQueueHelper {
      * @throws RuntimeException
      *             if sending or receiving the message fails
      */
-    public <T> SeqismMessage<T> sendAndReceiveOrThrow(SeqismMessage<T> message) {
+    public <R, C> SeqismMessage<R> sendAndReceiveOrThrow(SeqismMessage<C> message) {
         sendMessage(message);
         return receivedMessage(message);
     }
@@ -149,13 +149,13 @@ public class ProcessorQueueHelper {
      * @throws SeqismException
      *             if a timeout occurs or an AMQP error is encountered while receiving the message
      */
-    <T> SeqismMessage<T> receivedMessage(SeqismMessage<T> message) {
+    <R, C> SeqismMessage<R> receivedMessage(SeqismMessage<C> message) {
         String responseQueueName = queueNameHelper.getResponseQueueName(message.getHeader().getTranId());
-        ParameterizedTypeReference<SeqismMessage<T>> typeRef = new ParameterizedTypeReference<SeqismMessage<T>>() {
+        ParameterizedTypeReference<SeqismMessage<R>> typeRef = new ParameterizedTypeReference<SeqismMessage<R>>() {
         };
 
         try {
-            SeqismMessage<T> receivedMsg //
+            SeqismMessage<R> receivedMsg //
                     = rabbitTemplate.receiveAndConvert(responseQueueName, this.messageReceiveTimeout, typeRef);
             if (receivedMsg == null) {
                 log.error("Timeout occurred while waiting for response from queue : [{}]", responseQueueName);

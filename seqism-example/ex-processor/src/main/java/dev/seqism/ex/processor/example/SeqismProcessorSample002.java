@@ -15,7 +15,8 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class SeqismProcessorSample002 extends SeqismProcessor<SeqismProcessorSample002.Sample002Body> {
+public class SeqismProcessorSample002
+        extends SeqismProcessor<SeqismProcessorSample002.Sample002Body, SeqismProcessorSample002.Sample002Body> {
 
     public SeqismProcessorSample002(ObjectMapper mapper, ProcessorQueueHelper queueHelper) {
         super(mapper, queueHelper);
