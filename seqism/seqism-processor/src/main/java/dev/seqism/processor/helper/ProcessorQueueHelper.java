@@ -82,8 +82,10 @@ public class ProcessorQueueHelper {
      * This method first sends the provided message using {@code sendMessage(message)},
      * then waits for and returns the received message using {@code receivedMessage(message)}.
      *
-     * @param <T>
-     *            the type of the payload contained in the message
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the message to send and await a response for
      * @return the received {@link SeqismMessage} corresponding to the sent message
@@ -116,10 +118,10 @@ public class ProcessorQueueHelper {
      * If the message cannot be sent due to an AMQP-related exception, a {@link SeqismException}
      * is thrown with the corresponding error information.
      *
-     * @param message
-     *            the message to be sent to the command queue
      * @param <T>
      *            the type of the payload contained in the message
+     * @param message
+     *            the message to be sent to the command queue
      * @throws SeqismException
      *             if an error occurs while sending the message to the queue
      */
@@ -141,10 +143,12 @@ public class ProcessorQueueHelper {
      * it is returned; otherwise, a timeout error is logged and a {@link SeqismException} is thrown.
      * Handles AMQP exceptions by wrapping them in a {@link SeqismException}.
      *
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the original {@link SeqismMessage} for which a response is expected
-     * @param <T>
-     *            the type of the payload contained in the {@link SeqismMessage}
      * @return the received {@link SeqismMessage} from the response queue
      * @throws SeqismException
      *             if a timeout occurs or an AMQP error is encountered while receiving the message

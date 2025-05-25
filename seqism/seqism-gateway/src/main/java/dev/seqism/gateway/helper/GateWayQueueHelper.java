@@ -112,22 +112,25 @@ public class GateWayQueueHelper {
     }
 
     /**
-     * Sends the given {@link SeqismMessage} to a static queue and waits for a response.
+     * Sends the provided {@link SeqismMessage} to a static queue and waits for a response.
      * <p>
      * This method performs the following steps:
      * <ol>
      * <li>Logs the outgoing message for debugging purposes.</li>
-     * <li>Creates the necessary queues for the message.</li>
-     * <li>Sends the message to a static queue.</li>
+     * <li>Creates the necessary queues for message processing.</li>
+     * <li>Sends the message to a static queue determined by {@code queueNameHelper}.</li>
      * <li>Waits for and returns the response message.</li>
      * </ol>
      *
-     * @param <T>
-     *            the type of the payload contained in the {@link SeqismMessage}
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
-     *            the message to send and receive a response for
-     * @return the response {@link SeqismMessage} received after sending the original message
+     *            the message to send
+     * @return the response message received
      */
+
     public <R, C> SeqismMessage<C> sendAndReceiveInit(SeqismMessage<R> message) {
         log.debug("Sending message : [{}]", message);
 
@@ -145,8 +148,10 @@ public class GateWayQueueHelper {
      * This method logs the outgoing message, sends it to the appropriate response queue,
      * and then calls {@link #receive(SeqismMessage)} to wait for and return the next message.
      *
-     * @param <T>
-     *            the type of the payload contained in the {@link SeqismMessage}
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the message to send and await a response for
      * @return the next {@link SeqismMessage} received in response
@@ -228,8 +233,8 @@ public class GateWayQueueHelper {
      * If no message is received within the timeout or the message status is not {@code IN_PROGRESS},
      * deletes both the command and response queues associated with the transaction ID.
      * 
-     * @param <T>
-     *            the type of the payload in the {@link SeqismMessage}
+     * @param <R> the type of the response message payload
+     * @param <C> the type of the command message payload
      * @param message
      *            the reference message containing the transaction ID and header information
      * @return the received {@link SeqismMessage} of type {@code T}, or {@code null} if no message was received

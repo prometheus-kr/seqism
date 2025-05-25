@@ -54,8 +54,10 @@ public class GatewayService {
      * Initializes a Seqism process by marking the provided message as "in progress" with a generated transaction ID,
      * then sends the message to the appropriate queue and waits for a response.
      *
-     * @param <T>
-     *            the type of the payload contained in the SeqismMessage
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the message to initialize and send
      * @return the response message received after initialization
@@ -68,8 +70,10 @@ public class GatewayService {
      * Processes the given {@link SeqismMessage} by marking it as in-progress and sending it to the next queue.
      * Utilizes the {@code queueHelper} to send the message and receive the next response.
      *
-     * @param <T>
-     *            the type of the payload contained in the {@link SeqismMessage}
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the message to be processed and forwarded to the next queue
      * @return the response message received after processing the input message
@@ -97,8 +101,10 @@ public class GatewayService {
      * exception message.
      * All errors are logged.
      *
-     * @param <T>
-     *            the type of the message payload
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the message to send
      * @param sender

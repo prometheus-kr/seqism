@@ -94,8 +94,10 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
      * Invokes the specified {@link SeqismProcessor} with a message whose body is converted
      * to the processor's expected type using the configured {@code mapper}.
      *
-     * @param <T>
-     *            the type of the message body expected by the processor
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param processor
      *            the processor to handle the message
      * @param message
