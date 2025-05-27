@@ -34,7 +34,7 @@ public class SeqismProcessorSample002
 
     @Override
     public void process(SeqismMessage<Sample002Body> message) {
-        Sample002Body body = new Sample002Body("[Sample002] Step1", 1);
+        Sample002Body body = new Sample002Body(message.getBody().getLog() + " -> [Sample002] Step1", 1);
 
         SeqismMessage<Sample002Body> response = sendAndReceiveOrThrow(message.withBody(body));
 

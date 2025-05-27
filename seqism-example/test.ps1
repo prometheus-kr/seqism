@@ -62,16 +62,80 @@ function Test-SeqismResponse {
 # 1️⃣ Gateway로 테스트 메시지 전송
 Write-Host "Sending test message to Gateway..."
 
+
+
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"XXX"}, "body":"error will occur!"}'
+$expected = '{
+  "header": {
+    "bizCode": "XXX",
+    "tranId": "IGNORE",
+    "status": "FAILURE",
+    "error": {
+      "errorCode": "00020001",
+      "errorMessage": "BP Error : No processor found for bizCode : XXX"
+    }
+  },
+  "body": null
+}'
+Test-SeqismResponse $response $expected
+
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample001";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+$expected = '{
+  "header": {
+    "bizCode": "Sample001",
+    "tranId": "IGNORE",
+    "status": "FAILURE",
+    "error": {
+      "errorCode": "00010003",
+      "errorMessage": "GW Error : Queue does not exist"
+    }
+  },
+  "body": null
+}'
+Test-SeqismResponse $response $expected
+
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+$expected = '{
+  "header": {
+    "bizCode": "Sample002",
+    "tranId": "IGNORE",
+    "status": "FAILURE",
+    "error": {
+      "errorCode": "00010003",
+      "errorMessage": "GW Error : Queue does not exist"
+    }
+  },
+  "body": null
+}'
+Test-SeqismResponse $response $expected
+
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample003";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+$expected = '{
+  "header": {
+    "bizCode": "Sample003",
+    "tranId": "IGNORE",
+    "status": "FAILURE",
+    "error": {
+      "errorCode": "00010003",
+      "errorMessage": "GW Error : Queue does not exist"
+    }
+  },
+  "body": null
+}'
+Test-SeqismResponse $response $expected
+
+
+
 for ($i = 1; $i -le 2; $i++) { 
     $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"Sample001"}, "body":"Hello, Seqism!"}'
     $expected = '{
         "header": {
             "bizCode": "Sample001",
-            "tranId": "da46e17d-8a57-4c85-996a-bf64f39126b3",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
-        "body": "=====> Command_1111"
+        "body": "Hello, Seqism!=====> Command_1111"
     }'
     Test-SeqismResponse $response $expected
 
@@ -79,7 +143,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample001",
-            "tranId": "bc486dc0-89b8-4bdc-8fd0-0e86c4240e4e",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
@@ -91,7 +155,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample001",
-            "tranId": "1a019975-6ebd-4b8a-9a56-ca652dff1037",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
@@ -103,7 +167,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample001",
-            "tranId": "85d5ce35-372c-4f04-8e2a-502657a0a7da",
+            "tranId": "IGNORE",
             "status": "SUCCESS",
             "error": null
         },
@@ -112,16 +176,16 @@ for ($i = 1; $i -le 2; $i++) {
     Test-SeqismResponse $response $expected
 }
 for ($i = 1; $i -le 2; $i++) { 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"Sample002"}, "body":{"log":"what??", "step":11}}'
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"Sample002"}, "body":{"log":"when??", "step":11}}'
     $expected = '{
         "header": {
             "bizCode": "Sample002",
-            "tranId": "395c79eb-a68f-4972-bca8-474c8cb3eed4",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
         "body": {
-            "log": "[Sample002] Step1",
+            "log": "when?? -> [Sample002] Step1",
             "step": 1
         }
     }'
@@ -131,7 +195,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample002",
-            "tranId": "8f4499e5-7fb7-43ea-ac01-a71929834131",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
@@ -142,31 +206,31 @@ for ($i = 1; $i -le 2; $i++) {
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=13}} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="who??"; step=13}} | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample002",
-            "tranId": "61577df6-2632-4dad-b711-17486e3acd75",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
         "body": {
-            "log": "what?? -> [Sample002] Step3",
+            "log": "who?? -> [Sample002] Step3",
             "step": 3
         }
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=14}} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="where??"; step=14}} | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample002",
-            "tranId": "1cccdaed-bbbe-4f3e-b784-b5384b61886c",
+            "tranId": "IGNORE",
             "status": "SUCCESS",
             "error": null
         },
         "body": {
-            "log": "what?? -> [Sample002] Done",
+            "log": "where?? -> [Sample002] Done",
             "step": 4
         }
     }'
@@ -185,7 +249,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample003",
-            "tranId": "9960ff65-a22e-4310-9ab4-d268fa0aac1e",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
@@ -221,7 +285,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample003",
-            "tranId": "00cce1d6-3c66-4ff2-8166-88d7d7babe69",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
@@ -258,7 +322,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample003",
-            "tranId": "5704e00e-08b6-409a-97cb-171f68868244",
+            "tranId": "IGNORE",
             "status": "IN_PROGRESS",
             "error": null
         },
@@ -308,7 +372,7 @@ for ($i = 1; $i -le 2; $i++) {
     $expected = '{
         "header": {
             "bizCode": "Sample003",
-            "tranId": "04cf62e1-e977-498a-a1d8-45e48467986d",
+            "tranId": "IGNORE",
             "status": "SUCCESS",
             "error": null
         },
@@ -343,67 +407,6 @@ for ($i = 1; $i -le 2; $i++) {
     Test-SeqismResponse $response $expected
 }
 
-$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"XXX"}, "body":"error will occur!"}'
-$expected = '{
-  "header": {
-    "bizCode": "XXX",
-    "tranId": "5f384fd9-d91a-489f-a057-f67f0661d6e4",
-    "status": "FAILURE",
-    "error": {
-      "errorCode": "00020001",
-      "errorMessage": "BP Error : No processor found for bizCode : XXX"
-    }
-  },
-  "body": null
-}'
-Test-SeqismResponse $response $expected
-
-$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample001";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
-$expected = '{
-  "header": {
-    "bizCode": "Sample001",
-    "tranId": "xxx",
-    "status": "FAILURE",
-    "error": {
-      "errorCode": "00010003",
-      "errorMessage": "GW Error : Queue does not exist"
-    }
-  },
-  "body": null
-}'
-Test-SeqismResponse $response $expected
-
-$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
-$expected = '{
-  "header": {
-    "bizCode": "Sample002",
-    "tranId": "xxx",
-    "status": "FAILURE",
-    "error": {
-      "errorCode": "00010003",
-      "errorMessage": "GW Error : Queue does not exist"
-    }
-  },
-  "body": null
-}'
-Test-SeqismResponse $response $expected
-
-$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample003";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
-$expected = '{
-  "header": {
-    "bizCode": "Sample003",
-    "tranId": "xxx",
-    "status": "FAILURE",
-    "error": {
-      "errorCode": "00010003",
-      "errorMessage": "GW Error : Queue does not exist"
-    }
-  },
-  "body": null
-}'
-Test-SeqismResponse $response $expected
-
-
 
 $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{
     "header":{"bizCode":"Sample003"},
@@ -416,7 +419,7 @@ $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body 
 $expected = '{
   "header": {
     "bizCode": "Sample003",
-    "tranId": "bb3bafa0-d534-4afa-b0d3-cb75d6e9e3a7",
+    "tranId": "IGNORE",
     "status": "IN_PROGRESS",
     "error": null
   },
@@ -451,7 +454,7 @@ $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body 
  $expected = '{
   "header": {
     "bizCode": "Sample003",
-    "tranId": "fe020ca6-c13d-4844-b243-13e02574f8be",
+    "tranId": "IGNORE",
     "status": "IN_PROGRESS",
     "error": null
   },
@@ -480,12 +483,12 @@ $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body 
 $expected = '{
   "header": {
     "bizCode": "Sample004",
-    "tranId": "dummy-tran-id",
+    "tranId": "IGNORE",
     "status": "IN_PROGRESS",
     "error": null
   },
   "body": {
-    "result": "C",
+    "result": "A",
     "ssString": "11111111111"
   }
 }'
@@ -498,12 +501,12 @@ $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body 
 $expected = '{
   "header": {
     "bizCode": "Sample004",
-    "tranId": "dummy-tran-id",
+    "tranId": "IGNORE",
     "status": "IN_PROGRESS",
     "error": null
   },
   "body": {
-    "result": "C",
+    "result": "B",
     "ssString": "22222222222"
   }
 }'
@@ -516,7 +519,7 @@ $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body 
 $expected = '{
   "header": {
     "bizCode": "Sample004",
-    "tranId": "dummy-tran-id",
+    "tranId": "IGNORE",
     "status": "IN_PROGRESS",
     "error": null
   },
@@ -534,12 +537,12 @@ $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body 
 $expected = '{
   "header": {
     "bizCode": "Sample004",
-    "tranId": "dummy-tran-id",
+    "tranId": "IGNORE",
     "status": "SUCCESS",
     "error": null
   },
   "body": {
-    "result": "C",
+    "result": "D",
     "ssString": "44444444444"
   }
 }'
