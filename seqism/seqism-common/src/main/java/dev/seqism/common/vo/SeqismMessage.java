@@ -12,7 +12,6 @@ import lombok.Data;
  *
  * @param <T>
  *            the type of the message body
- *
  *            <p>
  *            Features:
  *            <ul>
@@ -20,7 +19,6 @@ import lombok.Data;
  *            <li>Factory methods for status transitions (success, in-progress, failure).</li>
  *            <li>Ability to create a new message with a different body.</li>
  *            </ul>
- *
  *            <p>
  *            Example usage:
  * 

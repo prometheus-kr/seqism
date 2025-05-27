@@ -14,7 +14,6 @@ import java.util.function.Function;
  * GatewayService provides methods to initialize and progress Seqism message flows
  * by interacting with the GateWayQueueHelper. It handles the sending and receiving
  * of messages, manages transaction IDs, and ensures proper error handling and logging.
- *
  * <p>
  * Main responsibilities:
  * <ul>
@@ -22,7 +21,6 @@ import java.util.function.Function;
  * <li>Progress an existing Seqism message flow to the next step.</li>
  * <li>Handle exceptions and convert them into standardized error responses.</li>
  * </ul>
- *
  * <p>
  * Usage:
  * 

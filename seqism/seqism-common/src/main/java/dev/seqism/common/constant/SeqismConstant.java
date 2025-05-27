@@ -6,7 +6,6 @@ package dev.seqism.common.constant;
  * This class contains configuration values such as timeouts and queue name
  * prefixes
  * for consistent usage across the codebase.
- *
  * <ul>
  * <li>{@link #RECEIVE_TIME_OUT} - Timeout in milliseconds for receiving operations.</li>
  * <li>{@link #QUEUE_DELETE_TIME} - Time in milliseconds after which a queue should be deleted.</li>

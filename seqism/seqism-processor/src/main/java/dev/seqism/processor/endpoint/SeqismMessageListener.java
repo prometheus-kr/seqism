@@ -17,7 +17,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
  * <p>
  * Subclasses must implement the {@link #proc(SeqismMessage)} method to define custom
  * message processing logic for messages of type {@code T}.
- *
  * <p>
  * Error handling is performed as follows:
  * <ul>
@@ -76,7 +75,6 @@ public abstract class SeqismMessageListener<T> {
 
     /**
      * Processes the given {@link SeqismMessage}.
-     *
      * <p>
      * This method should be implemented by subclasses to define how a {@code SeqismMessage}
      * of type {@code T} is handled.

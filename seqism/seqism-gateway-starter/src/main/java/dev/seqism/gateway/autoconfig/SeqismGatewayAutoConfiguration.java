@@ -24,5 +24,4 @@ import org.springframework.context.annotation.Import;
         GateWayQueueHelper.class,
         GatewayService.class
 })
-public class SeqismGatewayAutoConfiguration {
-}
+public class SeqismGatewayAutoConfiguration {}

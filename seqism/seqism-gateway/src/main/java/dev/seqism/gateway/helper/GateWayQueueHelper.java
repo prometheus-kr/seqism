@@ -143,7 +143,6 @@ public class GateWayQueueHelper {
     /**
      * Sends the specified {@link SeqismMessage} to a response queue determined by the transaction ID,
      * then waits to receive the next message in response.
-     *
      * <p>
      * This method logs the outgoing message, sends it to the appropriate response queue,
      * and then calls {@link #receive(SeqismMessage)} to wait for and return the next message.
@@ -233,8 +232,10 @@ public class GateWayQueueHelper {
      * If no message is received within the timeout or the message status is not {@code IN_PROGRESS},
      * deletes both the command and response queues associated with the transaction ID.
      * 
-     * @param <R> the type of the response message payload
-     * @param <C> the type of the command message payload
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
      * @param message
      *            the reference message containing the transaction ID and header information
      * @return the received {@link SeqismMessage} of type {@code T}, or {@code null} if no message was received
@@ -247,8 +248,7 @@ public class GateWayQueueHelper {
         String commandQueue = queueNameHelper.getCommandQueueName(tranId);
         String responseQueue = queueNameHelper.getResponseQueueName(tranId);
 
-        ParameterizedTypeReference<SeqismMessage<C>> typeRef = new ParameterizedTypeReference<SeqismMessage<C>>() {
-        };
+        ParameterizedTypeReference<SeqismMessage<C>> typeRef = new ParameterizedTypeReference<SeqismMessage<C>>() {};
 
         try {
             SeqismMessage<C> receivedMsg //

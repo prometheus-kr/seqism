@@ -12,26 +12,22 @@ import lombok.Data;
  * code and a descriptive message.
  * It provides predefined static instances for common gateway and business
  * processor errors.
- *
  * <p>
  * Example usage:
  * 
  * <pre>
  * ErrorInfo error = ErrorInfo.ERROR_0001_0001.addMessage("Additional details");
  * </pre>
- *
  * <ul>
  * <li>errorCode - Unique identifier for the error.</li>
  * <li>errorMessage - Human-readable description of the error.</li>
  * </ul>
- *
  * <p>
  * Predefined errors include:
  * <ul>
  * <li>Gateway Errors (error codes starting with 0001)</li>
  * <li>BizProcessor Errors (error codes starting with 0002)</li>
  * </ul>
- *
  * <p>
  * This class is immutable and serializable.
  */
