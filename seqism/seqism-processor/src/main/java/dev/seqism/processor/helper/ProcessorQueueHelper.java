@@ -155,8 +155,7 @@ public class ProcessorQueueHelper {
      */
     <R, C> SeqismMessage<R> receivedMessage(SeqismMessage<C> message) {
         String responseQueueName = queueNameHelper.getResponseQueueName(message.getHeader().getTranId());
-        ParameterizedTypeReference<SeqismMessage<R>> typeRef = new ParameterizedTypeReference<SeqismMessage<R>>() {
-        };
+        ParameterizedTypeReference<SeqismMessage<R>> typeRef = new ParameterizedTypeReference<SeqismMessage<R>>() {};
 
         try {
             SeqismMessage<R> receivedMsg //

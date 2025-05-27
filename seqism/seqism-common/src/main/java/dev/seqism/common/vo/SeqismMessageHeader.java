@@ -11,7 +11,6 @@ import lombok.Data;
  * <p>
  * This class is immutable and provides utility methods to create new instances
  * with updated status or error information.
- *
  * <p>
  * Typical usage:
  * 

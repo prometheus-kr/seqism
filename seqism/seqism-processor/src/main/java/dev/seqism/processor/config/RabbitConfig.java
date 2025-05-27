@@ -20,7 +20,6 @@ import dev.seqism.common.helper.QueueNameHelper;
  * queue declaration, and queue name management. It leverages Jackson for JSON
  * serialization/deserialization of messages and provides configurable queue names
  * and prefixes via application properties.
- *
  * <ul>
  * <li>Configures a {@link Jackson2JsonMessageConverter} for JSON message conversion.</li>
  * <li>Defines a {@link RabbitTemplate} for sending and receiving messages with JSON support.</li>
@@ -28,7 +27,6 @@ import dev.seqism.common.helper.QueueNameHelper;
  * <li>Declares a configurable RabbitMQ {@link Queue} bean.</li>
  * <li>Creates a {@link QueueNameHelper} bean for managing queue names and prefixes.</li>
  * </ul>
- *
  * <p>
  * Queue names and prefixes can be customized via the following application properties:
  * <ul>

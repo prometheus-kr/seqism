@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <p>
  * This listener uses a map of processors, each keyed by its business code, to efficiently dispatch
  * messages to the correct processor. If no processor is found for a given bizCode, the message is marked as failed.
- *
  * <p>
  * Dependencies:
  * <ul>
@@ -27,7 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>{@link ProcessorQueueHelper} for queue operations and sending failure messages.</li>
  * <li>A list of {@link SeqismProcessor} implementations, each handling a specific business code.</li>
  * </ul>
- *
  * <p>
  * Logging is provided via Lombok's {@code @Slf4j} annotation.
  */
@@ -48,7 +46,6 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
     /**
      * Constructs a new {@code DefaultSeqismMessageListener} with the specified {@link ObjectMapper},
      * {@link ProcessorQueueHelper}, and a list of {@link SeqismProcessor} instances.
-     *
      * <p>
      * This constructor initializes the message listener by setting up the object mapper for JSON
      * serialization/deserialization, the queue helper for processing message queues, and a map of

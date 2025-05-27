@@ -5,7 +5,6 @@ package dev.seqism.common.vo;
  * <p>
  * This exception encapsulates an {@link ErrorInfo} object, providing
  * additional context about the error that occurred.
- *
  * <p>
  * Typical usage involves throwing this exception when a specific error
  * condition, represented by an {@code ErrorInfo} instance, is encountered.

@@ -7,7 +7,6 @@ import dev.seqism.processor.helper.ProcessorQueueHelper;
 
 /**
  * Abstract base class for processing Seqism messages with a specific body type.
- * 
  * <p>
  * This processor uses an {@link ObjectMapper} for converting message bodies and a
  * {@link ProcessorQueueHelper} for handling message queue operations. Subclasses must
@@ -95,7 +94,6 @@ public abstract class SeqismProcessor<R, C> {
 
     /**
      * Processes the given {@link SeqismMessage}.
-     *
      * <p>
      * This method should be implemented to define how a {@code SeqismMessage} of type {@code T}
      * is handled by the processor.
