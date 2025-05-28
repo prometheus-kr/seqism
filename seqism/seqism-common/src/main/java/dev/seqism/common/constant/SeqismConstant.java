@@ -43,4 +43,11 @@ public class SeqismConstant {
      * by prepending this prefix to the specific queue identifier.
      */
     public static final String RESPONSE_QUEUE_PREFIX = "seqism-response-queue.";
+
+    /**
+     * Utility class containing constants for the Seqism application.
+     * <p>
+     * This class is not intended to be instantiated.
+     */
+    private SeqismConstant() {}
 }

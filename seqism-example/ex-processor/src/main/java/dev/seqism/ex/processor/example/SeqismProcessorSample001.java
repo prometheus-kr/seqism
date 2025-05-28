@@ -28,7 +28,7 @@ public class SeqismProcessorSample001 extends SeqismProcessor<String, String> {
 
     @Override
     public void process(SeqismMessage<String> message) {
-        String processed = "=====> Command_1111";
+        String processed = message.getBody() + "=====> Command_1111";
         SeqismMessage<String> response = sendAndReceiveOrThrow(message.withBody(processed));
 
         processed = response.getBody() + "=====> Command_2222";

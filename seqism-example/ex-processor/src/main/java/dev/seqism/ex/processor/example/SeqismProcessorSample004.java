@@ -37,14 +37,14 @@ public class SeqismProcessorSample004
         log.info("Received message: {}", message);
 
         BodyC commandBody;
-        commandBody = new BodyC("C", "11111111111");
+        commandBody = new BodyC("A", "11111111111");
 
         // 응답 메시지 생성 및 전송
         SeqismMessage<BodyC> command = message.withBody(commandBody);
         SeqismMessage<BodyR> abc = queueHelper.sendAndReceiveOrThrow(command);
         log.info("Response received: {}", abc);
 
-        commandBody = new BodyC("C", "22222222222");
+        commandBody = new BodyC("B", "22222222222");
         command = message.withBody(commandBody);
         abc = queueHelper.sendAndReceiveOrThrow(command);
         log.info("Response received: {}", abc);
@@ -54,7 +54,7 @@ public class SeqismProcessorSample004
         abc = queueHelper.sendAndReceiveOrThrow(command);
         log.info("Response received: {}", abc);
 
-        commandBody = new BodyC("C", "44444444444");
+        commandBody = new BodyC("D", "44444444444");
         command = message.withBody(commandBody).toSuccess();
         queueHelper.sendFinal(command);
     }
