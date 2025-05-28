@@ -1,14 +1,24 @@
 package dev.seqism.common.helper;
 
-import lombok.AllArgsConstructor;
-
 /**
- * Helper class for generating queue names used in messaging systems.
+ * Helper class for constructing queue names used in messaging or task processing systems.
  * <p>
- * This class provides methods to retrieve static, command, and response queue names,
- * optionally appending a transaction ID to the command and response queue names.
+ * This class encapsulates the logic for generating static, command, and response queue names,
+ * typically by combining a base prefix with a transaction identifier.
+ * <ul>
+ * <li><b>staticQueueName</b>: The fixed name of a static queue.</li>
+ * <li><b>commandQueuePrefix</b>: The base prefix for command queues, to which a transaction ID is appended.</li>
+ * <li><b>responseQueuePrefix</b>: The base prefix for response queues, to which a transaction ID is appended.</li>
+ * </ul>
+ * <p>
+ * Example usage:
+ * 
+ * <pre>
+ * QueueNameHelper helper = new QueueNameHelper("staticQueue", "cmdQueue-", "respQueue-");
+ * String commandQueue = helper.getCommandQueueName("123"); // "cmdQueue-123"
+ * String responseQueue = helper.getResponseQueueName("123"); // "respQueue-123"
+ * </pre>
  */
-@AllArgsConstructor
 public class QueueNameHelper {
     /**
      * The name of the static queue associated with this instance.
@@ -16,16 +26,33 @@ public class QueueNameHelper {
      */
     private final String staticQueueName;
     /**
-     * The name of the command queue associated with this instance.
-     * This value is typically used to identify and interact with a specific command queue
-     * in messaging or task processing systems.
+     * Prefix used for naming command queues.
+     * This value is typically set during initialization and is used to construct
+     * the full names of command queues within the application.
      */
-    private final String commandQueueName;
+    private final String commandQueuePrefix;
     /**
-     * The name of the response queue associated with this instance.
-     * Used to identify the queue where responses should be sent or received.
+     * Prefix used for naming response queues.
+     * This value is typically prepended to queue names to distinguish response queues
+     * from other types of queues within the system.
      */
-    private final String responseQueueName;
+    private final String responseQueuePrefix;
+
+    /**
+     * Constructs a new {@code QueueNameHelper} with the specified queue names.
+     *
+     * @param staticQueueName
+     *            the name of the static queue
+     * @param commandQueuePrefix
+     *            the name of the command queue
+     * @param responseQueuePrefix
+     *            the name of the response queue
+     */
+    public QueueNameHelper(String staticQueueName, String commandQueuePrefix, String responseQueuePrefix) {
+        this.staticQueueName = staticQueueName;
+        this.commandQueuePrefix = commandQueuePrefix;
+        this.responseQueuePrefix = responseQueuePrefix;
+    }
 
     /**
      * Retrieves the static queue name.
@@ -37,24 +64,24 @@ public class QueueNameHelper {
     }
 
     /**
-     * Generates the command queue name by appending the given transaction ID to the base command queue name.
+     * Generates the command queue name by appending the given transaction ID to the command queue prefix.
      *
      * @param tranId
-     *            the transaction ID to append to the command queue name
-     * @return the full command queue name including the transaction ID
+     *            the transaction ID to be appended to the command queue prefix
+     * @return the full command queue name for the specified transaction
      */
     public String getCommandQueueName(String tranId) {
-        return commandQueueName + tranId;
+        return commandQueuePrefix + tranId;
     }
 
     /**
-     * Generates the response queue name by appending the given transaction ID to the base response queue name.
+     * Generates the response queue name by appending the given transaction ID to the response queue prefix.
      *
      * @param tranId
-     *            the transaction ID to append to the response queue name
-     * @return the full response queue name for the specified transaction
+     *            the transaction ID to be appended to the response queue prefix
+     * @return the full response queue name for the specified transaction ID
      */
     public String getResponseQueueName(String tranId) {
-        return responseQueueName + tranId;
+        return responseQueuePrefix + tranId;
     }
 }
