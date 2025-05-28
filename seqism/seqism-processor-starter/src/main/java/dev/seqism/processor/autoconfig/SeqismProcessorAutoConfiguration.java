@@ -24,4 +24,10 @@ import org.springframework.context.annotation.Import;
         DefaultSeqismMessageListener.class,
         ProcessorQueueHelper.class
 })
-public class SeqismProcessorAutoConfiguration {}
+public class SeqismProcessorAutoConfiguration {
+    /**
+     * Default constructor for the {@code SeqismProcessorAutoConfiguration} class.
+     * Initializes a new instance of the configuration without any parameters.
+     */
+    public SeqismProcessorAutoConfiguration() {}
+}

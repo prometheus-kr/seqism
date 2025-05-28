@@ -39,6 +39,12 @@ import dev.seqism.common.helper.QueueNameHelper;
 @EnableRabbit
 public class RabbitConfig {
     /**
+     * Default constructor for the {@code RabbitConfig} class.
+     * Initializes a new instance of the configuration without any parameters.
+     */
+    public RabbitConfig() {}
+
+    /**
      * Creates a {@link Jackson2JsonMessageConverter} bean for converting messages to and from JSON
      * using the Jackson library. This converter is typically used with Spring AMQP to automatically
      * serialize and deserialize message payloads.

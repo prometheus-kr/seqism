@@ -24,4 +24,10 @@ import org.springframework.context.annotation.Import;
         GateWayQueueHelper.class,
         GatewayService.class
 })
-public class SeqismGatewayAutoConfiguration {}
+public class SeqismGatewayAutoConfiguration {
+    /**
+     * Default constructor for the {@code SeqismGatewayAutoConfiguration} class.
+     * Initializes a new instance of the configuration without any parameters.
+     */
+    public SeqismGatewayAutoConfiguration() {}
+}

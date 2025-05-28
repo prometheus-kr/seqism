@@ -50,10 +50,6 @@ public abstract class SeqismProcessor<R, C> {
      * This method delegates the send-and-receive operation to {@code queueHelper}, then converts the response body
      * to the expected type using the configured {@code mapper}. The returned message contains the converted body.
      *
-     * @param <R>
-     *            the type of the response message payload
-     * @param <C>
-     *            the type of the command message payload
      * @param message
      *            the message to send
      * @return the response message with the body converted to the expected type
