@@ -6,7 +6,7 @@
     
     <groupId>io.github.prometheus-kr</groupId>
     <artifactId>seqism-gateway</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <name>Seqism Gateway</name>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>io.github.prometheus-kr</groupId>
             <artifactId>seqism-common</artifactId>
-            <version>0.0.1</version>
+            <version>0.1.0</version>
         </dependency>
 
         <!-- Lombok (코드 간결화) -->
