@@ -54,6 +54,17 @@ public class SeqismMessage<T> implements Serializable {
     }
 
     /**
+     * Creates a copy of the current {@code SeqismMessage} instance with a new header,
+     * preserving the transaction ID and body, but excluding the business code.
+     * The new message will have its status set to {@code IN_PROGRESS} and the business code set to {@code null}.
+     *
+     * @return a new {@code SeqismMessage} instance with the business code excluded.
+     */
+    public SeqismMessage<T> copyMessageExcludeBizCode() {
+        return of(new SeqismMessageHeader(null, header.getTranId(), SeqismMessageStatus.IN_PROGRESS, null), body);
+    }
+
+    /**
      * Converts the current message to a success state by updating the header to indicate success,
      * while retaining the existing body.
      *
