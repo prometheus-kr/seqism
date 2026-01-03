@@ -1,5 +1,5 @@
-# 사용할 기본 이미지 (OpenJDK 17)
-FROM eclipse-temurin:17-jre
+# 사용할 기본 이미지 (OpenJDK 8)
+FROM eclipse-temurin:8-jre-alpine-3.23
 
 # 작업 디렉토리 설정
 WORKDIR /app

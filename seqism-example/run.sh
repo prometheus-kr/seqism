@@ -25,12 +25,12 @@ build_module() {
         MINGW*|MSYS*)
             docker_path="$(convert_path_for_docker "$abs_path")"
             m2_path="$HOME/.m2"
-            MSYS_NO_PATHCONV=1 docker run --rm -v "$m2_path":/root/.m2 -v "$docker_path":/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean install
+            MSYS_NO_PATHCONV=1 docker run --rm -v "$m2_path":/root/.m2 -v "$docker_path":/app -w /app maven:3.9.12-amazoncorretto-8-debian mvn clean install
             ;;
         *)
             docker_path="$abs_path"
             m2_path="$HOME/.m2"
-            docker run --rm -v "$m2_path":/root/.m2 -v "$docker_path":/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean install
+            docker run --rm -v "$m2_path":/root/.m2 -v "$docker_path":/app -w /app maven:3.9.12-amazoncorretto-8-debian mvn clean install
             ;;
     esac
 

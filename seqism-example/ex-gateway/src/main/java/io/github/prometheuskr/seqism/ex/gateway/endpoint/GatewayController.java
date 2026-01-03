@@ -3,7 +3,6 @@ package io.github.prometheuskr.seqism.ex.gateway.endpoint;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +31,7 @@ public class GatewayController {
     }
 
     ResponseEntity<SeqismMessage<Object>> buildResponseEntity(SeqismMessage<Object> message) {
-        HttpStatusCode status = message.getHeader().getStatus() == SeqismMessageStatus.FAILURE
+        HttpStatus status = message.getHeader().getStatus() == SeqismMessageStatus.FAILURE
                 ? HttpStatus.INTERNAL_SERVER_ERROR
                 : HttpStatus.OK;
 

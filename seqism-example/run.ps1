@@ -17,7 +17,7 @@ function Build-Module($moduleName) {
     }
     $dockerPath = Convert-PathForDocker "$((Resolve-Path $moduleName).Path)"
     $m2Path = Convert-PathForDocker "$env:USERPROFILE/.m2"
-    docker run --rm -v ${m2Path}:/root/.m2 -v ${dockerPath}:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean install
+    docker run --rm -v ${m2Path}:/root/.m2 -v ${dockerPath}:/app -w /app maven:3.9.12-amazoncorretto-8-debian mvn clean install
     if ($LASTEXITCODE -ne 0) {
         throw "Build failed in $moduleName"
     }

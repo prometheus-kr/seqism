@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import io.github.prometheuskr.seqism.common.constant.SeqismConstant;
 import io.github.prometheuskr.seqism.common.helper.QueueNameHelper;
 
@@ -49,11 +52,15 @@ public class RabbitConfig {
      * using the Jackson library. This converter is typically used with Spring AMQP to automatically
      * serialize and deserialize message payloads.
      *
+     * @param objectMapper
+     *           the {@link ObjectMapper} to be used for JSON conversion
+     * 
      * @return a configured {@link Jackson2JsonMessageConverter} instance
      */
     @Bean
-    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter(ObjectMapper objectMapper) {
+        objectMapper.registerModule(new JavaTimeModule());
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
 
     /**

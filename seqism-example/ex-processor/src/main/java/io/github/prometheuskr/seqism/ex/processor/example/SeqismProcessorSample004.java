@@ -1,6 +1,8 @@
 package io.github.prometheuskr.seqism.ex.processor.example;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -61,13 +63,17 @@ public class SeqismProcessorSample004
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class BodyC implements Serializable {
-        private final String result;
-        private final String ssString;
+        private String result;
+        private String ssString;
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class BodyR implements Serializable {
-        private final String number;
+        private String number;
     }
 }
