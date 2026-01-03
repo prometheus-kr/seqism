@@ -6,7 +6,7 @@
     
     <groupId>io.github.prometheus-kr</groupId>
     <artifactId>seqism-common</artifactId>
-    <version>0.1.0</version>
+    <version>1.17.0</version>
     <packaging>jar</packaging>
 
     <name>Seqism Common</name>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
+            <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

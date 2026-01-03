@@ -6,7 +6,7 @@
 
     <groupId>io.github.prometheus-kr</groupId>
     <artifactId>seqism-processor-spring-boot-starter</artifactId>
-    <version>0.1.0</version>
+    <version>1.17.0</version>
     <packaging>jar</packaging>
 
     <name>Seqism Processor Spring Boot Starter</name>
@@ -50,7 +50,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
+        <version>3.5.9</version>
         <relativePath/>
     </parent>
 
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>io.github.prometheus-kr</groupId>
             <artifactId>seqism-processor</artifactId>
-            <version>0.1.0</version>
+            <version>1.17.0</version>
         </dependency>
     </dependencies>
 
