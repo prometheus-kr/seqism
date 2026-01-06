@@ -5,7 +5,8 @@ function Convert-PathForDocker($path) {
     if ($strPath -match '^([A-Za-z]):') {
         $drive = $matches[1].ToLower()
         $dockerPath = $strPath -replace '^([A-Za-z]):', "/$drive"
-    } else {
+    }
+    else {
         $dockerPath = $strPath
     }
     return $dockerPath
@@ -17,7 +18,7 @@ function Build-Module($moduleName) {
     }
     $modulePath = Convert-PathForDocker "$((Resolve-Path $moduleName).Path)"
     $m2Path = Convert-PathForDocker "$env:USERPROFILE/.m2"
-    $dockerCmd = "docker run --rm -v ${m2Path}:/root/.m2 -v ${modulePath}:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean install"
+    $dockerCmd = "docker run --rm -v ${m2Path}:/root/.m2 -v ${modulePath}:/app -w /app maven:3.9.9-eclipse-temurin-21 mvn clean install"
     Write-Host "👉 Executing: $dockerCmd"
     Invoke-Expression $dockerCmd
     if ($LASTEXITCODE -ne 0) {

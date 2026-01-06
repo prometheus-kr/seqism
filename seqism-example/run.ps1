@@ -5,7 +5,8 @@ function Convert-PathForDocker($path) {
     if ($strPath -match '^([A-Za-z]):') {
         $drive = $matches[1].ToLower()
         $dockerPath = $strPath -replace '^([A-Za-z]):', "/$drive"
-    } else {
+    }
+    else {
         $dockerPath = $strPath
     }
     return $dockerPath
@@ -17,7 +18,7 @@ function Build-Module($moduleName) {
     }
     $dockerPath = Convert-PathForDocker "$((Resolve-Path $moduleName).Path)"
     $m2Path = Convert-PathForDocker "$env:USERPROFILE/.m2"
-    docker run --rm -v ${m2Path}:/root/.m2 -v ${dockerPath}:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean install
+    docker run --rm -v ${m2Path}:/root/.m2 -v ${dockerPath}:/app -w /app maven:3.9.9-eclipse-temurin-21 mvn clean install
     if ($LASTEXITCODE -ne 0) {
         throw "Build failed in $moduleName"
     }
@@ -56,7 +57,8 @@ do {
     try {
         $response = Invoke-RestMethod -Uri "http://localhost:8080/actuator/health" -Method "Get" -TimeoutSec 2
         $ready = $response.status -eq "UP"
-    } catch {
+    }
+    catch {
         $ready = $false
     }
 } until ($ready)
