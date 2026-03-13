@@ -52,6 +52,8 @@ public class GateWayQueueHelper {
     private final long queueDeleteTimeout;
 
     /**
+     * Constructs a {@code GateWayQueueHelper} with the required dependencies and configuration.
+     *
      * @param rabbitAdmin
      *            AMQP resource manager
      * @param rabbitTemplate

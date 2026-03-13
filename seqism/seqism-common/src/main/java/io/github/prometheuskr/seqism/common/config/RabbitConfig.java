@@ -14,42 +14,30 @@ import io.github.prometheuskr.seqism.common.constant.SeqismConstant;
 import io.github.prometheuskr.seqism.common.helper.QueueNameHelper;
 
 /**
- * Configuration class for setting up RabbitMQ integration using Spring AMQP.
+ * RabbitMQ configuration for the Seqism framework.
  * <p>
- * This class defines beans for message conversion, RabbitMQ template, administration,
- * queue declaration, and queue name management. It leverages Jackson for JSON
- * serialization/deserialization of messages and provides configurable queue names
- * and prefixes via application properties.
- * <ul>
- * <li>Configures a {@link Jackson2JsonMessageConverter} for JSON message conversion.</li>
- * <li>Defines a {@link RabbitTemplate} for sending and receiving messages with JSON support.</li>
- * <li>Provides a {@link RabbitAdmin} for managing AMQP resources such as queues and exchanges.</li>
- * <li>Declares a configurable RabbitMQ {@link Queue} bean.</li>
- * <li>Creates a {@link QueueNameHelper} bean for managing queue names and prefixes.</li>
- * </ul>
+ * Defines beans for JSON message conversion, {@link RabbitTemplate} (with configurable timeouts),
+ * {@link RabbitAdmin}, static/onetime queues, and {@link QueueNameHelper}.
  * <p>
- * Queue names and prefixes can be customized via the following application properties:
+ * Configurable application properties:
  * <ul>
- * <li><code>seqism.queue.static.name</code> (defaults to {@link SeqismConstant#SEQISM_STATIC_QUEUE})</li>
- * <li><code>seqism.queue.command.prefix</code> (defaults to {@link SeqismConstant#COMMAND_QUEUE_PREFIX})</li>
- * <li><code>seqism.queue.response.prefix</code> (defaults to {@link SeqismConstant#RESPONSE_QUEUE_PREFIX})</li>
+ * <li>{@code seqism.queue.static.name} — Static queue name (default: {@link SeqismConstant#SEQISM_STATIC_QUEUE})</li>
+ * <li>{@code seqism.queue.onetime.name} — Onetime queue name (default: {@link SeqismConstant#SEQISM_ONETIME_QUEUE})</li>
+ * <li>{@code seqism.queue.command.prefix} — Command queue prefix (default: {@link SeqismConstant#COMMAND_QUEUE_PREFIX})</li>
+ * <li>{@code seqism.queue.response.prefix} — Response queue prefix (default: {@link SeqismConstant#RESPONSE_QUEUE_PREFIX})</li>
+ * <li>{@code seqism.queue.receive.timeout} — Receive/reply timeout in ms (default: {@link SeqismConstant#RECEIVE_TIME_OUT})</li>
  * </ul>
  */
 @Configuration
 @EnableRabbit
 public class RabbitConfig {
-    /**
-     * Default constructor for the {@code RabbitConfig} class.
-     * Initializes a new instance of the configuration without any parameters.
-     */
+    /** Default constructor. */
     public RabbitConfig() {}
 
     /**
-     * Creates a {@link Jackson2JsonMessageConverter} bean for converting messages to and from JSON
-     * using the Jackson library. This converter is typically used with Spring AMQP to automatically
-     * serialize and deserialize message payloads.
+     * JSON message converter using Jackson.
      *
-     * @return a configured {@link Jackson2JsonMessageConverter} instance
+     * @return a {@link Jackson2JsonMessageConverter} instance
      */
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
@@ -57,17 +45,14 @@ public class RabbitConfig {
     }
 
     /**
-     * Creates and configures a {@link RabbitTemplate} bean with the provided {@link ConnectionFactory}
-     * and {@link Jackson2JsonMessageConverter}. This template is used for sending and receiving messages
-     * to and from RabbitMQ, with message conversion handled by Jackson for JSON serialization and deserialization.
+     * {@link RabbitTemplate} with JSON conversion and configurable receive/reply timeouts.
      *
      * @param connectionFactory
-     *            the connection factory to connect to RabbitMQ
+     *            the connection factory
      * @param jackson2JsonMessageConverter
-     *            the message converter for JSON serialization
+     *            the JSON message converter
      * @param messageReceiveTimeout
-     *            the timeout (in milliseconds) for receiving messages and RPC replies, injected from the property
-     *            {@code seqism.queue.receive.timeout} or defaults to {@link SeqismConstant#RECEIVE_TIME_OUT}
+     *            receive and reply timeout in ms ({@code seqism.queue.receive.timeout})
      * @return a configured {@link RabbitTemplate} instance
      */
     @Bean
@@ -83,14 +68,10 @@ public class RabbitConfig {
     }
 
     /**
-     * Creates and configures a {@link RabbitAdmin} bean using the provided {@link RabbitTemplate}.
-     * <p>
-     * {@code RabbitAdmin} is a helper class that simplifies the management of AMQP resources such as queues,
-     * exchanges, and bindings within a RabbitMQ broker. By declaring this bean, the application can automatically
-     * declare and manage these resources at startup.
+     * {@link RabbitAdmin} for managing AMQP resources (queues, exchanges, bindings).
      *
      * @param rabbitTemplate
-     *            the {@link RabbitTemplate} to be used by the {@code RabbitAdmin} for communication with RabbitMQ
+     *            the template for RabbitMQ communication
      * @return a configured {@link RabbitAdmin} instance
      */
     @Bean
@@ -99,15 +80,11 @@ public class RabbitConfig {
     }
 
     /**
-     * Defines a RabbitMQ queue bean with a configurable name.
-     * <p>
-     * The queue name is injected from the application properties using the key
-     * {@code seqism.queue.static.name}. If the property is not set, it defaults to
-     * {@code seqism-static-queue}.
+     * Static queue for multi-step message processing.
      *
      * @param queueName
-     *            the name of the queue, resolved from application properties
-     * @return a new {@link Queue} instance with the specified name
+     *            queue name ({@code seqism.queue.static.name})
+     * @return a new {@link Queue} instance
      */
     @Bean
     public Queue staticQueue(
@@ -116,15 +93,11 @@ public class RabbitConfig {
     }
 
     /**
-     * Defines a one-time RabbitMQ queue bean with a configurable name.
-     * <p>
-     * The queue name is injected from the application properties using the key
-     * {@code seqism.queue.onetime.name}. If the property is not set, it defaults to
-     * {@link SeqismConstant#SEQISM_ONETIME_QUEUE}.
+     * Onetime queue for RPC-style single-transaction exchange.
      *
      * @param queueName
-     *            the name of the queue, resolved from application properties
-     * @return a new {@link Queue} instance with the specified name
+     *            queue name ({@code seqism.queue.onetime.name})
+     * @return a new {@link Queue} instance
      */
     @Bean
     public Queue onetimeQueue(
@@ -133,17 +106,16 @@ public class RabbitConfig {
     }
 
     /**
-     * Creates a {@link QueueNameHelper} bean configured with queue names and prefixes.
+     * {@link QueueNameHelper} configured with queue names and prefixes from application properties.
      *
      * @param staticQueueName
-     *            the name of the static queue, resolved from the property
-     *            {@code seqism.queue.static.name} or defaults to {@link SeqismConstant#SEQISM_STATIC_QUEUE}
+     *            static queue name ({@code seqism.queue.static.name})
      * @param commandQueuePrefix
-     *            the prefix for command queues, resolved from the property
-     *            {@code seqism.queue.command.prefix} or defaults to {@link SeqismConstant#COMMAND_QUEUE_PREFIX}
+     *            command queue prefix ({@code seqism.queue.command.prefix})
      * @param responseQueuePrefix
-     *            the prefix for response queues, resolved from the property
-     *            {@code seqism.queue.response.prefix} or defaults to {@link SeqismConstant#RESPONSE_QUEUE_PREFIX}
+     *            response queue prefix ({@code seqism.queue.response.prefix})
+     * @param onetimeQueueName
+     *            onetime queue name ({@code seqism.queue.onetime.name})
      * @return a configured {@link QueueNameHelper} instance
      */
     @Bean
