@@ -75,6 +75,28 @@ public abstract class SeqismMessageListener<T> {
     }
 
     /**
+     * Handles incoming messages from the one-time RabbitMQ queue synchronously (RPC-style).
+     * Processes the message in a single round-trip and returns the response directly.
+     * Spring AMQP automatically sends the returned value back to the caller's reply queue.
+     *
+     * @param message
+     *            the message received from the one-time queue
+     * @return the processed response message
+     */
+    @RabbitListener(queues = "${seqism.queue.onetime.name:seqism-onetime-queue}")
+    public SeqismMessage<?> handleOnetimeMessage(SeqismMessage<T> message) {
+        try {
+            return this.procOnetime(message);
+        } catch (SeqismException e) {
+            log.error("An exception occurred while processing onetime message", e);
+            return message.toFailure(e.getErrorInfo());
+        } catch (Exception e) {
+            log.error("An exception occurred while processing onetime message", e);
+            return message.toFailure(ErrorInfo.ERROR_0002_0002, e.getMessage());
+        }
+    }
+
+    /**
      * Processes the given {@link SeqismMessage}.
      * <p>
      * This method should be implemented by subclasses to define how a {@code SeqismMessage}
@@ -84,4 +106,16 @@ public abstract class SeqismMessageListener<T> {
      *            the message to process
      */
     abstract void proc(SeqismMessage<T> seqismMessage);
+
+    /**
+     * Processes a one-time (RPC-style) {@link SeqismMessage} and returns the response directly.
+     * <p>
+     * This method should be implemented by subclasses to define how a one-time
+     * {@code SeqismMessage} of type {@code T} is handled.
+     *
+     * @param seqismMessage
+     *            the message to process
+     * @return the response message to return to the caller
+     */
+    abstract SeqismMessage<?> procOnetime(SeqismMessage<T> seqismMessage);
 }

@@ -31,6 +31,11 @@ public class GatewayController {
         return buildResponseEntity(gatewayService.nextSeqism(message));
     }
 
+    @PostMapping("/onetime")
+    public ResponseEntity<SeqismMessage<Object>> onetimeSeqism(@RequestBody SeqismMessage<Object> message) {
+        return buildResponseEntity(gatewayService.onetimeSeqism(message));
+    }
+
     ResponseEntity<SeqismMessage<Object>> buildResponseEntity(SeqismMessage<Object> message) {
         HttpStatusCode status = message.getHeader().getStatus() == SeqismMessageStatus.FAILURE
                 ? HttpStatus.INTERNAL_SERVER_ERROR

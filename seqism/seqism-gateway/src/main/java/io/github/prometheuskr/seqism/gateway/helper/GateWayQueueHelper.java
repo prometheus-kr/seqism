@@ -165,6 +165,39 @@ public class GateWayQueueHelper {
     }
 
     /**
+     * Sends the provided {@link SeqismMessage} to the one-time queue and synchronously waits for a response
+     * using RPC-style communication. No command/response queues are created since this is a single transaction.
+     * <p>
+     * Uses Spring AMQP's built-in RPC mechanism ({@code convertSendAndReceiveAsType}) which automatically
+     * handles the reply-to queue and correlates the response.
+     *
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
+     * @param message
+     *            the message to send
+     * @return the response message received from the processor
+     */
+    @SuppressWarnings("unchecked")
+    public <R, C> SeqismMessage<C> sendAndReceiveOnetime(SeqismMessage<R> message) {
+        log.debug("Sending onetime message : [{}]", message);
+
+        String onetimeQueueName = queueNameHelper.getOnetimeQueueName();
+        ParameterizedTypeReference<SeqismMessage<C>> typeRef = new ParameterizedTypeReference<SeqismMessage<C>>() {};
+
+        try {
+            rabbitTemplate.setReplyTimeout(this.messageReceiveTimeout);
+            SeqismMessage<C> response = rabbitTemplate.convertSendAndReceiveAsType(
+                    onetimeQueueName, message, typeRef);
+            log.debug("Received onetime response : [{}]", response);
+            return response;
+        } catch (AmqpException e) {
+            throw new SeqismException(ErrorInfo.ERROR_0001_0004, e);
+        }
+    }
+
+    /**
      * Creates command and response queues for the given message transaction.
      * <p>
      * This method generates queue names based on the transaction ID extracted from the message header,

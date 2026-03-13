@@ -8,7 +8,8 @@ function Invoke-SeqismRestMethod {
     $resp = Invoke-WebRequest -Uri $Uri -Method $Method -ContentType $ContentType -Body $Body -SkipHttpErrorCheck
     try {
         return $resp.Content | ConvertFrom-Json -Depth 20
-    } catch {
+    }
+    catch {
         return $resp.Content
     }
 }
@@ -20,7 +21,8 @@ function Remove-FieldsRecursive {
         foreach ($item in $obj) {
             Remove-FieldsRecursive $item $fieldsToRemove
         }
-    } elseif ($obj -is [psobject]) {
+    }
+    elseif ($obj -is [psobject]) {
         foreach ($field in $fieldsToRemove) {
             if ($obj.PSObject.Properties[$field]) {
                 $obj.PSObject.Properties.Remove($field)
@@ -53,7 +55,8 @@ function Test-SeqismResponse {
 
     if ($ok) {
         Write-Host "✅ 예상과 일치"
-    } else {
+    }
+    else {
         Write-Host "❌ 전체 응답 불일치!`n예상: $($expectedCopy | ConvertTo-Json -Depth 20)`n실제: $($actualCopy | ConvertTo-Json -Depth 20)" -ForegroundColor Red
         exit
     }
@@ -79,7 +82,7 @@ $expected = '{
 }'
 Test-SeqismResponse $response $expected
 
-$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample001";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample001"; tranId = "xxx"; }; body = "error will occur!" } | ConvertTo-Json)
 $expected = '{
   "header": {
     "bizCode": "Sample001",
@@ -94,7 +97,7 @@ $expected = '{
 }'
 Test-SeqismResponse $response $expected
 
-$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample002"; tranId = "xxx"; }; body = "error will occur!" } | ConvertTo-Json)
 $expected = '{
   "header": {
     "bizCode": "Sample002",
@@ -109,7 +112,7 @@ $expected = '{
 }'
 Test-SeqismResponse $response $expected
 
-$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample003";tranId="xxx";}; body="error will occur!"} | ConvertTo-Json)
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample003"; tranId = "xxx"; }; body = "error will occur!" } | ConvertTo-Json)
 $expected = '{
   "header": {
     "bizCode": "Sample003",
@@ -139,7 +142,7 @@ for ($i = 1; $i -le 2; $i++) {
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample001";tranId=$response.header.tranId;}; body="Hello, Seqism!"} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample001"; tranId = $response.header.tranId; }; body = "Hello, Seqism!" } | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample001",
@@ -151,7 +154,7 @@ for ($i = 1; $i -le 2; $i++) {
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample001";tranId=$response.header.tranId;}; body="Hello, Seqism!"} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample001"; tranId = $response.header.tranId; }; body = "Hello, Seqism!" } | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample001",
@@ -163,7 +166,7 @@ for ($i = 1; $i -le 2; $i++) {
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample001";tranId=$response.header.tranId;}; body="Hello, Seqism!"} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample001"; tranId = $response.header.tranId; }; body = "Hello, Seqism!" } | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample001",
@@ -191,7 +194,7 @@ for ($i = 1; $i -le 2; $i++) {
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="what??"; step=12}} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample002"; tranId = $response.header.tranId; }; body = @{log = "what??"; step = 12 } } | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample002",
@@ -206,7 +209,7 @@ for ($i = 1; $i -le 2; $i++) {
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="who??"; step=13}} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample002"; tranId = $response.header.tranId; }; body = @{log = "who??"; step = 13 } } | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample002",
@@ -221,7 +224,7 @@ for ($i = 1; $i -le 2; $i++) {
     }'
     Test-SeqismResponse $response $expected
 
-    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header=@{bizCode="Sample002";tranId=$response.header.tranId;}; body=@{log="where??"; step=14}} | ConvertTo-Json)
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{header = @{bizCode = "Sample002"; tranId = $response.header.tranId; }; body = @{log = "where??"; step = 14 } } | ConvertTo-Json)
     $expected = '{
         "header": {
             "bizCode": "Sample002",
@@ -275,13 +278,13 @@ for ($i = 1; $i -le 2; $i++) {
         [PSCustomObject]@{ txnId = $response.body.transactions[0].txnId; amount = $response.body.transactions[0].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[0].status }
     )
     $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
-        header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
-        body = @{
-            userId = "userA"
-            transactions = $transactions
-            meta = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
-        }
-    } | ConvertTo-Json -Depth 20)
+            header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+            body   = @{
+                userId       = "userA"
+                transactions = $transactions
+                meta         = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
+            }
+        } | ConvertTo-Json -Depth 20)
     $expected = '{
         "header": {
             "bizCode": "Sample003",
@@ -312,13 +315,13 @@ for ($i = 1; $i -le 2; $i++) {
         [PSCustomObject]@{ txnId = $response.body.transactions[1].txnId; amount = $response.body.transactions[1].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[1].status }
     )
     $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
-        header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
-        body = @{
-            userId = "userA"
-            transactions = $transactions
-            meta = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
-        }
-    } | ConvertTo-Json -Depth 20)
+            header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+            body   = @{
+                userId       = "userA"
+                transactions = $transactions
+                meta         = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
+            }
+        } | ConvertTo-Json -Depth 20)
     $expected = '{
         "header": {
             "bizCode": "Sample003",
@@ -362,13 +365,13 @@ for ($i = 1; $i -le 2; $i++) {
         [PSCustomObject]@{ txnId = $response.body.transactions[2].txnId; amount = $response.body.transactions[2].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[2].status }
     )
     $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
-        header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
-        body = @{
-            userId = "userA"
-            transactions = $transactions
-            meta = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
-        }
-    } | ConvertTo-Json -Depth 20)
+            header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+            body   = @{
+                userId       = "userA"
+                transactions = $transactions
+                meta         = @{ requestIp = "127.0.0.1"; deviceType = "PC" }
+            }
+        } | ConvertTo-Json -Depth 20)
     $expected = '{
         "header": {
             "bizCode": "Sample003",
@@ -445,13 +448,13 @@ $transactions = @(
     [PSCustomObject]@{ txnId = $response.body.transactions[0].txnId; amount = $response.body.transactions[0].amount; timestamp = "2025-05-20T23:16:15"; status = $response.body.transactions[0].status }
 )
 $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
-    header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
-    body = @{
-        dummy = "dummy"
-        transactions = $transactions
-    }
-} | ConvertTo-Json -Depth 5)
- $expected = '{
+        header = @{ bizCode = "Sample003"; tranId = $response.header.tranId }
+        body   = @{
+            dummy        = "dummy"
+            transactions = $transactions
+        }
+    } | ConvertTo-Json -Depth 5)
+$expected = '{
   "header": {
     "bizCode": "Sample003",
     "tranId": "IGNORE",
@@ -477,9 +480,9 @@ Test-SeqismResponse $response $expected
 
 # Sample004 테스트
 $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body (@{
-    header = @{ bizCode = "Sample004" }
-    body = @{ number = "42" }
-} | ConvertTo-Json)
+        header = @{ bizCode = "Sample004" }
+        body   = @{ number = "42" }
+    } | ConvertTo-Json)
 $expected = '{
   "header": {
     "bizCode": "Sample004",
@@ -495,9 +498,9 @@ $expected = '{
 Test-SeqismResponse $response $expected
 
 $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
-    header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
-    body = @{ number = "42" }
-} | ConvertTo-Json)
+        header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
+        body   = @{ number = "42" }
+    } | ConvertTo-Json)
 $expected = '{
   "header": {
     "bizCode": "Sample004",
@@ -513,9 +516,9 @@ $expected = '{
 Test-SeqismResponse $response $expected
 
 $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
-    header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
-    body = @{ number = "42" }
-} | ConvertTo-Json)
+        header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
+        body   = @{ number = "42" }
+    } | ConvertTo-Json)
 $expected = '{
   "header": {
     "bizCode": "Sample004",
@@ -531,9 +534,9 @@ $expected = '{
 Test-SeqismResponse $response $expected
 
 $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/next" -Body (@{
-    header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
-    body = @{ number = "42" }
-} | ConvertTo-Json)
+        header = @{ bizCode = "Sample004"; tranId = $response.header.tranId }
+        body   = @{ number = "42" }
+    } | ConvertTo-Json)
 $expected = '{
   "header": {
     "bizCode": "Sample004",
@@ -548,6 +551,182 @@ $expected = '{
 }'
 Test-SeqismResponse $response $expected
 
+
+
+# Onetime001 테스트
+for ($i = 1; $i -le 2; $i++) {
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body '{"header":{"bizCode":"Onetime001"}, "body":"Hello, Onetime!"}'
+    $expected = '{
+        "header": {
+            "bizCode": "Onetime001",
+            "tranId": "IGNORE",
+            "status": "SUCCESS",
+            "error": null
+        },
+        "body": "Hello, Onetime! =====> Onetime Done!"
+    }'
+    Test-SeqismResponse $response $expected
+}
+
+# Onetime002 테스트
+for ($i = 1; $i -le 2; $i++) {
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body (@{
+            header = @{ bizCode = "Onetime002" }
+            body   = @{ name = "TestItem"; value = 50; status = "PENDING" }
+        } | ConvertTo-Json)
+    $expected = '{
+        "header": {
+            "bizCode": "Onetime002",
+            "tranId": "IGNORE",
+            "status": "SUCCESS",
+            "error": null
+        },
+        "body": {
+            "name": "TestItem",
+            "value": 100,
+            "status": "COMPLETED"
+        }
+    }'
+    Test-SeqismResponse $response $expected
+}
+
+# Onetime003 테스트
+for ($i = 1; $i -le 2; $i++) {
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body (@{
+            header = @{ bizCode = "Onetime003" }
+            body   = @{
+                orderId     = "ORD-001"
+                items       = @(
+                    @{ itemName = "Apple"; price = 1000; quantity = 3; subtotal = 0 },
+                    @{ itemName = "Banana"; price = 500; quantity = 5; subtotal = 0 }
+                )
+                totalAmount = 0
+                status      = "PENDING"
+            }
+        } | ConvertTo-Json -Depth 5)
+    $expected = '{
+        "header": {
+            "bizCode": "Onetime003",
+            "tranId": "IGNORE",
+            "status": "SUCCESS",
+            "error": null
+        },
+        "body": {
+            "orderId": "ORD-001",
+            "items": [
+                {
+                    "itemName": "Apple",
+                    "price": 1000,
+                    "quantity": 3,
+                    "subtotal": 3000
+                },
+                {
+                    "itemName": "Banana",
+                    "price": 500,
+                    "quantity": 5,
+                    "subtotal": 2500
+                }
+            ],
+            "totalAmount": 5500,
+            "status": "CONFIRMED"
+        }
+    }'
+    Test-SeqismResponse $response $expected
+}
+
+# Onetime 존재하지 않는 bizCode 테스트
+$response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body '{"header":{"bizCode":"XXX"}, "body":"error!"}'
+$expected = '{
+    "header": {
+        "bizCode": "XXX",
+        "tranId": "IGNORE",
+        "status": "FAILURE",
+        "error": {
+            "errorCode": "00020001",
+            "errorMessage": "BP Error : No processor found for bizCode : XXX"
+        }
+    },
+    "body": null
+}'
+Test-SeqismResponse $response $expected
+
+
+# ==========================================
+# Init vs Onetime 단일 트랜잭션 속도 비교
+# ==========================================
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host " Init vs Onetime 단일 트랜잭션 속도 비교" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+
+# 워밍업
+Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"InitSingle"}, "body":"warmup"}' | Out-Null
+Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body '{"header":{"bizCode":"OnetimeSingle"}, "body":"warmup"}' | Out-Null
+
+$iterations = 30
+
+# InitSingle 테스트
+$initTimes = @()
+for ($i = 1; $i -le $iterations; $i++) {
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"InitSingle"}, "body":"SpeedTest"}'
+    $sw.Stop()
+    $initTimes += $sw.ElapsedMilliseconds
+
+    $expected = '{
+        "header": {
+            "bizCode": "InitSingle",
+            "tranId": "IGNORE",
+            "status": "SUCCESS",
+            "error": null
+        },
+        "body": "SpeedTest =====> Init Single Done!"
+    }'
+    Test-SeqismResponse $response $expected
+}
+
+# OnetimeSingle 테스트
+$onetimeTimes = @()
+for ($i = 1; $i -le $iterations; $i++) {
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body '{"header":{"bizCode":"OnetimeSingle"}, "body":"SpeedTest"}'
+    $sw.Stop()
+    $onetimeTimes += $sw.ElapsedMilliseconds
+
+    $expected = '{
+        "header": {
+            "bizCode": "OnetimeSingle",
+            "tranId": "IGNORE",
+            "status": "SUCCESS",
+            "error": null
+        },
+        "body": "SpeedTest =====> Onetime Single Done!"
+    }'
+    Test-SeqismResponse $response $expected
+}
+
+# 결과 출력
+$initAvg = ($initTimes | Measure-Object -Average).Average
+$initMin = ($initTimes | Measure-Object -Minimum).Minimum
+$initMax = ($initTimes | Measure-Object -Maximum).Maximum
+
+$onetimeAvg = ($onetimeTimes | Measure-Object -Average).Average
+$onetimeMin = ($onetimeTimes | Measure-Object -Minimum).Minimum
+$onetimeMax = ($onetimeTimes | Measure-Object -Maximum).Maximum
+
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host " 속도 비교 결과 ($iterations 회 반복)" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ("[Init Single]    평균: {0:N1}ms | 최소: {1}ms | 최대: {2}ms" -f $initAvg, $initMin, $initMax) -ForegroundColor Yellow
+Write-Host ("[Onetime Single] 평균: {0:N1}ms | 최소: {1}ms | 최대: {2}ms" -f $onetimeAvg, $onetimeMin, $onetimeMax) -ForegroundColor Green
+
+$diff = $initAvg - $onetimeAvg
+if ($diff -gt 0) {
+    Write-Host ("`nOnetime이 평균 {0:N1}ms 빠름 ({1:N1}% 향상)" -f $diff, (($diff / $initAvg) * 100)) -ForegroundColor Green
+}
+else {
+    Write-Host ("`nInit이 평균 {0:N1}ms 빠름" -f (-$diff)) -ForegroundColor Yellow
+}
+Write-Host "========================================`n" -ForegroundColor Cyan
 
 
 Write-Host "Test completed!"

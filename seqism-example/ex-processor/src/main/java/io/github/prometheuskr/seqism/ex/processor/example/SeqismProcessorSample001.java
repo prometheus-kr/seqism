@@ -41,4 +41,9 @@ public class SeqismProcessorSample001 extends SeqismProcessor<String, String> {
         processed = response.getBody() + "=====> Command_4444";
         sendFinal(response.withBody(processed).toSuccess());
     }
+
+    @Override
+    public SeqismMessage<?> processOnetime(SeqismMessage<String> message) {
+        throw new UnsupportedOperationException("processOnetime is not supported for Sample001");
+    }
 }

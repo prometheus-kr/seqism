@@ -98,4 +98,16 @@ public abstract class SeqismProcessor<R, C> {
      *            the message to process; must not be {@code null}
      */
     public abstract void process(SeqismMessage<R> message);
+
+    /**
+     * Processes a one-time (RPC-style) {@link SeqismMessage} and returns the response directly.
+     * <p>
+     * Subclasses must implement this method to define how a one-time message is processed
+     * and what response to return to the caller.
+     *
+     * @param message
+     *            the message to process; must not be {@code null}
+     * @return the response message to return to the caller
+     */
+    public abstract SeqismMessage<?> processOnetime(SeqismMessage<R> message);
 }

@@ -49,6 +49,11 @@ public class SeqismProcessorSample002
         sendFinal(response.withBody(body).toSuccess());
     }
 
+    @Override
+    public SeqismMessage<?> processOnetime(SeqismMessage<Sample002Body> message) {
+        throw new UnsupportedOperationException("processOnetime is not supported for Sample002");
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

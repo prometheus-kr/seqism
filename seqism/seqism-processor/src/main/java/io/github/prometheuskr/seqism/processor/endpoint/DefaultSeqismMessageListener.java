@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.prometheuskr.seqism.common.vo.ErrorInfo;
+import io.github.prometheuskr.seqism.common.vo.SeqismException;
 import io.github.prometheuskr.seqism.common.vo.SeqismMessage;
 import io.github.prometheuskr.seqism.processor.SeqismProcessor;
 import io.github.prometheuskr.seqism.processor.helper.ProcessorQueueHelper;
@@ -86,6 +87,45 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
             log.error("No processor found for bizCode : [{}]", bizCode);
             queueHelper.sendFinal(message.toFailure(ErrorInfo.ERROR_0002_0001, bizCode));
         }
+    }
+
+    /**
+     * Processes a one-time (RPC-style) message by routing to the appropriate processor
+     * based on the business code. Returns the processor's response directly.
+     *
+     * @param message
+     *            the message to be processed
+     * @return the processed response message
+     */
+    @Override
+    SeqismMessage<?> procOnetime(SeqismMessage<Object> message) {
+        String bizCode = message.getHeader().getBizCode();
+        SeqismProcessor<?, ?> processor = processorMap.get(bizCode);
+
+        if (processor != null) {
+            return callOnetimeProcessor(processor, message);
+        } else {
+            log.error("No processor found for bizCode : [{}]", bizCode);
+            return message.toFailure(ErrorInfo.ERROR_0002_0001, bizCode);
+        }
+    }
+
+    /**
+     * Invokes the specified {@link SeqismProcessor} for a one-time (RPC-style) message,
+     * converting the body and returning the processor's result directly.
+     *
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
+     * @param processor
+     *            the processor to handle the message
+     * @param message
+     *            the incoming message with a body to be converted and processed
+     * @return the processed response message
+     */
+    <R, C> SeqismMessage<?> callOnetimeProcessor(SeqismProcessor<R, C> processor, SeqismMessage<Object> message) {
+        return processor.processOnetime(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
     }
 
     /**

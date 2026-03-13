@@ -60,6 +60,11 @@ public class SeqismProcessorSample004
         queueHelper.sendFinal(command);
     }
 
+    @Override
+    public SeqismMessage<?> processOnetime(SeqismMessage<BodyR> message) {
+        throw new UnsupportedOperationException("processOnetime is not supported for Sample004");
+    }
+
     @Data
     public static class BodyC implements Serializable {
         private final String result;

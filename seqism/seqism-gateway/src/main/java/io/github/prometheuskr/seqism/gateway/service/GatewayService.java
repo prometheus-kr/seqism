@@ -82,6 +82,23 @@ public class GatewayService {
     }
 
     /**
+     * Sends a one-time (RPC-style) Seqism message by generating a unique transaction ID,
+     * marking the message as in-progress, and sending it to the one-time queue.
+     * The processor handles the message in a single round-trip and returns the final response.
+     *
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
+     * @param message
+     *            the message to send
+     * @return the response message received from the processor
+     */
+    public <R, C> SeqismMessage<C> onetimeSeqism(SeqismMessage<R> message) {
+        return sendAndReceive(message.toInProgress(generateTranId()), queueHelper::sendAndReceiveOnetime);
+    }
+
+    /**
      * Generates a unique transaction ID using a randomly generated UUID.
      *
      * @return a string representation of a randomly generated UUID to be used as a transaction ID

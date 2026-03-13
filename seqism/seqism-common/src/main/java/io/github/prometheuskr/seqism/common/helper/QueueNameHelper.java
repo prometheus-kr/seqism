@@ -37,6 +37,11 @@ public class QueueNameHelper {
      * from other types of queues within the system.
      */
     private final String responseQueuePrefix;
+    /**
+     * The name of the one-time queue associated with this instance.
+     * This value is assigned at construction time and does not change.
+     */
+    private final String onetimeQueueName;
 
     /**
      * Constructs a new {@code QueueNameHelper} with the specified queue names.
@@ -47,11 +52,15 @@ public class QueueNameHelper {
      *            the name of the command queue
      * @param responseQueuePrefix
      *            the name of the response queue
+     * @param onetimeQueueName
+     *            the name of the one-time queue
      */
-    public QueueNameHelper(String staticQueueName, String commandQueuePrefix, String responseQueuePrefix) {
+    public QueueNameHelper(String staticQueueName, String commandQueuePrefix, String responseQueuePrefix,
+            String onetimeQueueName) {
         this.staticQueueName = staticQueueName;
         this.commandQueuePrefix = commandQueuePrefix;
         this.responseQueuePrefix = responseQueuePrefix;
+        this.onetimeQueueName = onetimeQueueName;
     }
 
     /**
@@ -83,5 +92,14 @@ public class QueueNameHelper {
      */
     public String getResponseQueueName(String tranId) {
         return responseQueuePrefix + tranId;
+    }
+
+    /**
+     * Retrieves the one-time queue name.
+     *
+     * @return the name of the one-time queue
+     */
+    public String getOnetimeQueueName() {
+        return onetimeQueueName;
     }
 }

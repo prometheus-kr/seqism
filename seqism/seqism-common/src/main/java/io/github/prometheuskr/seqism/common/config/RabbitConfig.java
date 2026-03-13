@@ -145,7 +145,9 @@ public class RabbitConfig {
             @Value("${seqism.queue.command.prefix:" + SeqismConstant.COMMAND_QUEUE_PREFIX
                     + "}") String commandQueuePrefix,
             @Value("${seqism.queue.response.prefix:" + SeqismConstant.RESPONSE_QUEUE_PREFIX
-                    + "}") String responseQueuePrefix) {
-        return new QueueNameHelper(staticQueueName, commandQueuePrefix, responseQueuePrefix);
+                    + "}") String responseQueuePrefix,
+            @Value("${seqism.queue.onetime.name:" + SeqismConstant.SEQISM_ONETIME_QUEUE
+                    + "}") String onetimeQueueName) {
+        return new QueueNameHelper(staticQueueName, commandQueuePrefix, responseQueuePrefix, onetimeQueueName);
     }
 }
