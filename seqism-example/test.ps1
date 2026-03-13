@@ -662,11 +662,13 @@ Write-Host "========================================" -ForegroundColor Cyan
 Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"InitSingle"}, "body":"warmup"}' | Out-Null
 Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body '{"header":{"bizCode":"OnetimeSingle"}, "body":"warmup"}' | Out-Null
 
-$iterations = 30
+$iterations = 100
 
-# InitSingle 테스트
+# 번갈아가며 테스트 (Init → Onetime → Init → Onetime ...)
 $initTimes = @()
+$onetimeTimes = @()
 for ($i = 1; $i -le $iterations; $i++) {
+    # Init
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/init" -Body '{"header":{"bizCode":"InitSingle"}, "body":"SpeedTest"}'
     $sw.Stop()
@@ -682,11 +684,8 @@ for ($i = 1; $i -le $iterations; $i++) {
         "body": "SpeedTest =====> Init Single Done!"
     }'
     Test-SeqismResponse $response $expected
-}
 
-# OnetimeSingle 테스트
-$onetimeTimes = @()
-for ($i = 1; $i -le $iterations; $i++) {
+    # Onetime
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $response = Invoke-SeqismRestMethod -Uri "http://localhost:8080/api/onetime" -Body '{"header":{"bizCode":"OnetimeSingle"}, "body":"SpeedTest"}'
     $sw.Stop()
