@@ -103,8 +103,25 @@ public class RabbitConfig {
      * @return a new {@link Queue} instance with the specified name
      */
     @Bean
-    public Queue queue(
+    public Queue staticQueue(
             @Value("${seqism.queue.static.name:" + SeqismConstant.SEQISM_STATIC_QUEUE + "}") String queueName) {
+        return new Queue(queueName);
+    }
+
+    /**
+     * Defines a one-time RabbitMQ queue bean with a configurable name.
+     * <p>
+     * The queue name is injected from the application properties using the key
+     * {@code seqism.queue.onetime.name}. If the property is not set, it defaults to
+     * {@link SeqismConstant#SEQISM_ONETIME_QUEUE}.
+     *
+     * @param queueName
+     *            the name of the queue, resolved from application properties
+     * @return a new {@link Queue} instance with the specified name
+     */
+    @Bean
+    public Queue onetimeQueue(
+            @Value("${seqism.queue.onetime.name:" + SeqismConstant.SEQISM_ONETIME_QUEUE + "}") String queueName) {
         return new Queue(queueName);
     }
 

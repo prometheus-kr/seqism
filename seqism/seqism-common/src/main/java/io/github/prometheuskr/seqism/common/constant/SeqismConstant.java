@@ -32,6 +32,10 @@ public class SeqismConstant {
      */
     public static final String SEQISM_STATIC_QUEUE = "seqism-static-queue";
     /**
+     * The name of the one-time queue used in the Seqism application.
+     */
+    public static final String SEQISM_ONETIME_QUEUE = "seqism-onetime-queue";
+    /**
      * Prefix used for naming command queues in the Seqism system.
      * This constant is typically appended with a specific identifier to form the
      * full queue name.
