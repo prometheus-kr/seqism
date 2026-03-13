@@ -1,4 +1,4 @@
-package io.github.prometheuskr.seqism.processor.config;
+package io.github.prometheuskr.seqism.common.config;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;

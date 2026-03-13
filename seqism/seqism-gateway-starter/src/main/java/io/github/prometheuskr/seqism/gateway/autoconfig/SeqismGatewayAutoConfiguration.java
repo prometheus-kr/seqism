@@ -3,7 +3,7 @@ package io.github.prometheuskr.seqism.gateway.autoconfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import io.github.prometheuskr.seqism.gateway.config.RabbitConfig;
+import io.github.prometheuskr.seqism.common.config.RabbitConfig;
 import io.github.prometheuskr.seqism.gateway.helper.GateWayQueueHelper;
 import io.github.prometheuskr.seqism.gateway.service.GatewayService;
 

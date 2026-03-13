@@ -3,7 +3,7 @@ package io.github.prometheuskr.seqism.processor.autoconfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import io.github.prometheuskr.seqism.processor.config.RabbitConfig;
+import io.github.prometheuskr.seqism.common.config.RabbitConfig;
 import io.github.prometheuskr.seqism.processor.endpoint.DefaultSeqismMessageListener;
 import io.github.prometheuskr.seqism.processor.helper.ProcessorQueueHelper;
 
