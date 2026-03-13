@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 
+import io.github.prometheuskr.seqism.common.constant.SeqismConstant;
 import io.github.prometheuskr.seqism.common.vo.ErrorInfo;
 import io.github.prometheuskr.seqism.common.vo.SeqismException;
 import io.github.prometheuskr.seqism.common.vo.SeqismMessage;
@@ -59,7 +60,7 @@ public abstract class SeqismMessageListener<T> {
      * @param message
      *            the message received from the queue to be processed
      */
-    @RabbitListener(queues = "${seqism.queue.static.name:seqism-static-queue}")
+    @RabbitListener(queues = "${seqism.queue.static.name:" + SeqismConstant.SEQISM_STATIC_QUEUE + "}")
     public void handleMessage(SeqismMessage<T> message) {
         CompletableFuture.runAsync(() -> {
             try {
@@ -83,7 +84,7 @@ public abstract class SeqismMessageListener<T> {
      *            the message received from the one-time queue
      * @return the processed response message
      */
-    @RabbitListener(queues = "${seqism.queue.onetime.name:seqism-onetime-queue}")
+    @RabbitListener(queues = "${seqism.queue.onetime.name:" + SeqismConstant.SEQISM_ONETIME_QUEUE + "}")
     public SeqismMessage<?> handleOnetimeMessage(SeqismMessage<T> message) {
         try {
             return this.procOnetime(message);

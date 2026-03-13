@@ -65,13 +65,20 @@ public class RabbitConfig {
      *            the connection factory to connect to RabbitMQ
      * @param jackson2JsonMessageConverter
      *            the message converter for JSON serialization
+     * @param messageReceiveTimeout
+     *            the timeout (in milliseconds) for receiving messages and RPC replies, injected from the property
+     *            {@code seqism.queue.receive.timeout} or defaults to {@link SeqismConstant#RECEIVE_TIME_OUT}
      * @return a configured {@link RabbitTemplate} instance
      */
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
-            Jackson2JsonMessageConverter jackson2JsonMessageConverter) {
+            Jackson2JsonMessageConverter jackson2JsonMessageConverter,
+            @Value("${seqism.queue.receive.timeout:" + SeqismConstant.RECEIVE_TIME_OUT
+                    + "}") long messageReceiveTimeout) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(jackson2JsonMessageConverter);
+        template.setReplyTimeout(messageReceiveTimeout);
+        template.setReceiveTimeout(messageReceiveTimeout);
         return template;
     }
 

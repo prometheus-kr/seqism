@@ -1,19 +1,18 @@
 package io.github.prometheuskr.seqism.processor.endpoint;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.prometheuskr.seqism.common.vo.ErrorInfo;
-import io.github.prometheuskr.seqism.common.vo.SeqismException;
 import io.github.prometheuskr.seqism.common.vo.SeqismMessage;
 import io.github.prometheuskr.seqism.processor.SeqismProcessor;
 import io.github.prometheuskr.seqism.processor.helper.ProcessorQueueHelper;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Default implementation of {@link SeqismMessageListener} that routes incoming messages
@@ -90,6 +89,23 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
     }
 
     /**
+     * Invokes the specified {@link SeqismProcessor} with a message whose body is converted
+     * to the processor's expected type using the configured {@code mapper}.
+     *
+     * @param <R>
+     *            the type of the response message payload
+     * @param <C>
+     *            the type of the command message payload
+     * @param processor
+     *            the processor to handle the message
+     * @param message
+     *            the incoming message with a body to be converted and processed
+     */
+    <R, C> void callProcessor(SeqismProcessor<R, C> processor, SeqismMessage<Object> message) {
+        processor.process(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
+    }
+
+    /**
      * Processes a one-time (RPC-style) message by routing to the appropriate processor
      * based on the business code. Returns the processor's response directly.
      *
@@ -125,23 +141,7 @@ public class DefaultSeqismMessageListener extends SeqismMessageListener<Object> 
      * @return the processed response message
      */
     <R, C> SeqismMessage<?> callOnetimeProcessor(SeqismProcessor<R, C> processor, SeqismMessage<Object> message) {
-        return processor.processOnetime(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
-    }
-
-    /**
-     * Invokes the specified {@link SeqismProcessor} with a message whose body is converted
-     * to the processor's expected type using the configured {@code mapper}.
-     *
-     * @param <R>
-     *            the type of the response message payload
-     * @param <C>
-     *            the type of the command message payload
-     * @param processor
-     *            the processor to handle the message
-     * @param message
-     *            the incoming message with a body to be converted and processed
-     */
-    <R, C> void callProcessor(SeqismProcessor<R, C> processor, SeqismMessage<Object> message) {
-        processor.process(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
+        return processor
+                .processOnetime(message.withBody(mapper.convertValue(message.getBody(), processor.getBodyType())));
     }
 }
